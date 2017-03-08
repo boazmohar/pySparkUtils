@@ -88,7 +88,8 @@ def watch(func):
     """ Decorator that will abort all running spark jobs if there are failed tasks.
         It will lunch the decorated function in a different process as a daemon.
         It assumes a input variable in the decorated function of type SparkContext.
-        If failed tasks are found, the process is terminated and all current scheduled jobs are aborted
+        If failed tasks are found, the process is terminated and all current scheduled jobs are aborted the function
+        will return None
     :param func: function to decorate
     :return: decorated function
     """
@@ -118,10 +119,10 @@ def watch(func):
                     info = status.getStageInfo(sid)
                     if info:
                         if info.numFailedTasks > 0:
-                            logging.getLogger('pySparkUtils').error('Found failed tasks')
+                            logging.getLogger('pySparkUtils').error('Found failed tasks in %s' % func)
                             sc.cancelAllJobs()
                             p.terminate()
-                            return
+                            return None
             time.sleep(1)
         return result.get()
     return dec
