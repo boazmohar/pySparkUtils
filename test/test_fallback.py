@@ -12,3 +12,4 @@ def test_fallback(eng):
 
     sc = test_func(eng)
     assert sc.defaultParallelism == target_cores
+    sc.stop()
