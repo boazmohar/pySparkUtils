@@ -19,7 +19,6 @@ install:
   - conda info -a
   - conda create --yes -q -n test python=$TRAVIS_PYTHON_VERSION pip pytest
   - source activate test
-  - pip install .
   - pip install -r requirements-dev.txt
   - wget http://d3kbcqa49mib13.cloudfront.net/spark-2.1.0-bin-hadoop2.7.tgz
   - tar -xzf spark-2.1.0-bin-hadoop2.7.tgz
