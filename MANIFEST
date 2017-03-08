@@ -3,4 +3,6 @@ setup.cfg
 setup.py
 pySparkUtils/__init__.py
 pySparkUtils/utils.py
-test/test_change_sc.py
+test/test_change.py
+test/test_fallback.py
+test/test_watch.py
