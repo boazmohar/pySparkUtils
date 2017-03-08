@@ -1,7 +1,7 @@
 """ A set of utilities to manage pySpark SparkContext object
 Assumes you have pyspark (and py4j) on the PYTHONPATH and SPARK_HOME is defined
 """
-
+from future.utils import iteritems
 import logging
 import time
 import sys
@@ -10,7 +10,7 @@ from multiprocessing import Process, Queue
 from pyspark import SparkContext, SparkConf
 
 
-def change_sc(sc=None, app_name='customSpark', master=None, wait_for_sc=True, timeout=30, fail_on_timeout=True,
+def change(sc=None, app_name='customSpark', master=None, wait_for_sc=True, timeout=30, fail_on_timeout=True,
           refresh_rate=0.5, **kwargs):
     """ Returns a new Spark Context (sc) object with added properties set
 
@@ -60,28 +60,31 @@ def change_sc(sc=None, app_name='customSpark', master=None, wait_for_sc=True, ti
     return sc
 
 
-def sc_fallback(func):
+def fallback(func):
     """ Decorator function for functions that handle spark context.
         If a function changes sc we might lose it if an error occurs in the function.
         In the event of an error this decorator will log the error but return sc.
-        It assumes a local variable in the function named 'sc' is the Spark Context
     :param func: function to decorate
     :return: decorated function
     """
-    def dec():
+    def dec(*args, **kwargs):
         try:
-            func()
+            func(*args, **kwargs)
         except Exception as e:
             logging.getLogger('pySparkUtils').error('Decorator handled exception %s' % e)
             _, _, tb = sys.exc_info()
-            while tb.tpythob_next:
+            while tb.tb_next:
                 tb = tb.tb_next
             frame = tb.tb_frame
-            return frame.f_locals['sc']
+            for key, value in iteritems(frame.f_locals):
+                if isinstance(value, SparkContext) and value._jsc is not None:
+                    return frame.f_locals[key]
+            logging.getLogger('pySparkUtils').error('Could not find SparkContext')
+            return None
     return dec
 
 
-def watch_failures(func):
+def watch(func):
     """ Decorator that will abort all running spark jobs if there are failed tasks.
         It will lunch the decorated function in a different process as a daemon.
         It assumes a input variable in the decorated function of type SparkContext.
