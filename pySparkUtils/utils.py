@@ -2,6 +2,7 @@
 Assumes you have pyspark (and py4j) on the PYTHONPATH and SPARK_HOME is defined
 """
 from future.utils import iteritems
+import collections
 import logging
 import time
 import shutil
@@ -254,13 +255,29 @@ def balanced_repartition(data, partitions):
 
 
 @thunder_decorator
-def regroup(rdd, groups=10):
+def regroup(rdd, groups=10, check_first=False):
     """ regroup an rdd using a new key added that is 0-numGtoup-1
 
     :param rdd: input rdd as a (k,v) pairs
     :param groups: number of groups to concatenate to
+    :param check_first: check if first value is a key value pair.
     :return: a new rdd in the form of (groupNum, list of (k, v) in that group) pairs
+
+    Example:
+    >>>data = sc.parallelize(zip(range(4), range(4)))
+    >>>data.collect()
+    >>> [(0, 0), (1, 1), (2, 2), (3, 3)]
+    >>>data2 = regroup(data, 2)
+    >>>data2.collect()
+    >>> [(0, [(0, 0), (2, 2)]), (1, [(1, 1), (3, 3)])]
     """
+    if check_first:
+        first = rdd.first()
+        if isinstance(first, (list, tuple, collections.Iterable)):
+            if len(first) != 2:
+                raise ValueError('first item was not not length 2: %d' % len(first))
+        else:
+            raise ValueError('first item was wrong type: %s' % type(first))
     rdd = rdd.map(lambda kv: (kv[0] % groups, (kv[0], kv[1])), preservesPartitioning=True)
     return rdd.groupByKey().mapValues(list)
 
