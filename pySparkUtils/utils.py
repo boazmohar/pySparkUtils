@@ -72,7 +72,7 @@ def fallback(func):
     """
     def dec(*args, **kwargs):
         try:
-            func(*args, **kwargs)
+            return func(*args, **kwargs)
         except Exception as e:
             logging.getLogger('pySparkUtils').error('Decorator handled exception %s' % e)
             _, _, tb = sys.exc_info()
