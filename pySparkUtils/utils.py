@@ -109,10 +109,10 @@ def watch(func):
                 sc = item
         if sc is None:
             raise ValueError('Could not find sc in the input params')
-        p.start()
+
         # get the status of all current stages
         status = sc.statusTracker()
-
+        p.start()
         while result.empty():
             flag = False
             ids = status.getJobIdsForGroup()
@@ -139,12 +139,12 @@ def watch(func):
     return dec
 
 
-def thunder_wrapper(func):
+def thunder_decorator(func):
     """ decorator for functions so they could get as input a thunder.Images / thunder.Series object,
-    while they are expecting an rdd. Also will return the data from rdd to the appropriate type
-    Assumes only one input object of type Images/Series, and one output object of type RDD
-    :param func: function to decorate
-    :return: decorated function
+       while they are expecting an rdd. Also will return the data from rdd to the appropriate type
+       Assumes only one input object of type Images/Series, and up to one output object of type RDD
+       :param func: function to decorate
+       :return: decorated function
     """
     def dec(*args, **kwargs):
         # find Images / Series object in args
@@ -200,13 +200,14 @@ def thunder_wrapper(func):
             result = func(*args, **kwargs)
 
         if image_flag is None:
-            print(sum(image_args))
-            print(sum(series_args))
+            raise RuntimeError('Target function did not run')
+
         #handle output
         if not isinstance(result, tuple):
             result = (result,)
         result_len = len(result)
         rdd_index = np.where(list(map(lambda x: isinstance(x, RDD), result)))[0]
+
         # no RDD as output
         if len(rdd_index) == 0:
             logging.getLogger('pySparkUtils').debug('No RDDs found in output')
@@ -219,20 +220,20 @@ def thunder_wrapper(func):
             raise ValueError('Expecting one RDD as output got: %d' % len(rdd_index))
         result = list(result)
         rdd_index = rdd_index[0]
+
+        # handle type of output
         if image_flag:
             result[rdd_index] = td.images.fromrdd(result[rdd_index])
         else:
             result[rdd_index] = td.series.fromrdd(result[rdd_index])
-
         if result_len == 1:
             return result[0]
         else:
             return result
-
     return dec
 
 
-@thunder_wrapper
+@thunder_decorator
 def balanced_repartition(data, partitions):
     """ Reparations an RDD making sure data is evenly distributed across partitions
     for Spark version < 2.1 (see: https://issues.apache.org/jira/browse/SPARK-17817)
@@ -252,7 +253,7 @@ def balanced_repartition(data, partitions):
         raise ValueError('Wrong data type, expected [RDD, Images, Series] got: %s' % type(data))
 
 
-@thunder_wrapper
+@thunder_decorator
 def regroup(rdd, groups=10):
     """ regroup an rdd using a new key added that is 0-numGtoup-1
 
@@ -264,39 +265,47 @@ def regroup(rdd, groups=10):
     return rdd.groupByKey().mapValues(list)
 
 
-def saveRDDPickel(data, path, batch_size=10, overwrite=False):
-    """
+@thunder_decorator
+def save_rdd_as_pickle(rdd, path, batch_size=10, overwrite=False):
+    """ Saves an rdd by grouping all the records of each partition as one pickle file
 
-    :param data:
-    :param path:
-    :param batch_size:
-    :param overwrite:
-    :return:
+    :param rdd: rdd to save
+    :param path: where to save
+    :param batch_size: batch size to pass to spark saveAsPickleFile
+    :param overwrite: if directory exist whether to overwrite
     """
     if os.path.isdir(path):
         if overwrite:
-            print('Deleting files from: %s' % path)
+            logging.getLogger('pySparkUtils').info('Deleting files from: %s' % path)
             shutil.rmtree(path)
-            print('Done deleting files from: %s' % path)
+            logging.getLogger('pySparkUtils').info('Done deleting files from: %s' % path)
         else:
-            print('Directory %s already exists and overwrite is false' % path)
-            return
-    rdd = data.tordd().glom()
-    rdd.saveAsPickleFile(path, batchSize=batch_size)
-    print('Saved rdd to pickel to: %s' % path)
+            logging.getLogger('pySparkUtils').error('Directory %s already exists and overwrite is false' % path)
+            raise IOError('Directory %s already exists and overwrite is false' % path)
+    rdd.glom().saveAsPickleFile(path, batchSize=batch_size)
+    logging.getLogger('pySparkUtils').info('Saved rdd as pickle to: %s' % path)
 
 
-def loadRDDPickel(sc, path, minPartitions=None):
+def load_rdd_from_pickle(sc, path, min_partitions=None, return_type='images'):
+    """ Loads an rdd that was saved as one pickel file per partition
+
+    :param sc: Spark Context
+    :param path: directory to load from
+    :param min_partitions: minimum number of partitions. if None will be sc.defaultParallelism
+    :param return_type: what to return. 'rdd' - RDD, 'images' - Thunder Images object, 'series' - Thunder Series object
+    :return: based on return type.
     """
-
-    :param sc:
-    :param path:
-    :param minPartitions:
-    :return:
-    """
-    if minPartitions is None:
-        minPartitions = sc.defaultParallelism
-    rdd = sc.pickleFile(path, minPartitions=minPartitions)
+    if min_partitions is None:
+        min_partitions = sc.defaultParallelism
+    rdd = sc.pickleFile(path, minPartitions=min_partitions)
     rdd = rdd.flatMap(lambda x: x)
-    return td.images.fromrdd(rdd).coalesce(minPartitions)
-    print('Loaded rdd to from: %s' % path)
+    if return_type == 'images':
+        result = td.images.fromrdd(rdd).coalesce(min_partitions)
+    elif  return_type == 'series':
+        result = td.series.fromrdd(rdd).coalesce(min_partitions)
+    elif  return_type == 'rdd':
+        result = rdd.coalesce(min_partitions)
+    else:
+        raise ValueError('return_type not supported: %s' % return_type)
+    logging.getLogger('pySparkUtils').info('Loaded rdd from: %s as type: %s' % (path, return_type))
+    return result
