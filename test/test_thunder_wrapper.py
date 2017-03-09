@@ -1,13 +1,12 @@
-from pySparkUtils.utils import thunder_wrapper
+from pySparkUtils.utils import thunder_decorator
 import pytest
 import thunder as td
-import numpy as np
 from pyspark import RDD
 pytestmark = pytest.mark.usefixtures("eng")
 
 
 def test_no_input():
-    @thunder_wrapper
+    @thunder_decorator
     def test_func(arg1, arg2, arg3, arg4):
         return 1
     with pytest.raises(ValueError) as excinfo:
@@ -16,7 +15,7 @@ def test_no_input():
 
 
 def test_two_inputs(eng):
-    @thunder_wrapper
+    @thunder_decorator
     def test_func(arg1, arg2, arg3, arg4):
         return 1
     images = td.images.fromrandom(engine=eng)
@@ -43,27 +42,27 @@ def test_two_inputs(eng):
 
 
 def test_no_rdd_output(eng):
-    @thunder_wrapper
+    @thunder_decorator
     def test_func(arg1, arg2, arg3, arg4):
         return 4
     images = td.images.fromrandom(engine=eng)
     result = test_func(1, 2, arg3=images, arg4=4)
     assert result == 4
 
-    @thunder_wrapper
+    @thunder_decorator
     def test_func2(arg1, arg2, arg3, arg4):
         return 4, 5
     result2 = test_func2(1, 2, arg3=images, arg4=4)
     assert result2 == (4, 5)
 
-    @thunder_wrapper
+    @thunder_decorator
     def test_func3(arg1, arg2, arg3, arg4):
         return
     result3 = test_func3(1, 2, arg3=images, arg4=4)
     assert result3 is None
 
 def test_two_outputs(eng):
-    @thunder_wrapper
+    @thunder_decorator
     def test_func(arg1, arg2, arg3, arg4):
         return arg3, arg3
     images = td.images.fromrandom(engine=eng)
@@ -73,7 +72,7 @@ def test_two_outputs(eng):
 
 
 def test_images(eng):
-    @thunder_wrapper
+    @thunder_decorator
     def test_func(arg1, arg2, arg3, arg4):
         assert isinstance(arg3, RDD)
         return 1, 2, arg3, 4
@@ -82,7 +81,7 @@ def test_images(eng):
     result = test_func(1, 2, arg3=images, arg4=4)
     assert isinstance(result[2], td.images.Images)
 
-    @thunder_wrapper
+    @thunder_decorator
     def test_func2(arg1, arg2, arg3, arg4):
         assert isinstance(arg2, RDD)
         return 1, arg2, 3, 4
@@ -91,7 +90,7 @@ def test_images(eng):
 
 
 def test_series(eng):
-    @thunder_wrapper
+    @thunder_decorator
     def test_func(arg1, arg2, arg3, arg4):
         assert isinstance(arg3, RDD)
         return 1, 2, arg3, 4
@@ -100,7 +99,7 @@ def test_series(eng):
     result = test_func(1, 2, arg3=series, arg4=4)
     assert isinstance(result[2], td.series.Series)
 
-    @thunder_wrapper
+    @thunder_decorator
     def test_func2(arg1, arg2, arg3, arg4):
         assert isinstance(arg2, RDD)
         return 1, arg2, 3, 4
@@ -108,7 +107,7 @@ def test_series(eng):
     assert isinstance(result[1], td.series.Series)
 
 def test_rdd(eng):
-    @thunder_wrapper
+    @thunder_decorator
     def test_func(arg1, arg2, arg3, arg4):
         return 1, 2, arg3, 4
 
@@ -117,7 +116,7 @@ def test_rdd(eng):
     result = test_func(1, 2, arg3=rdd, arg4=4)
     assert isinstance(result[2], RDD)
 
-    @thunder_wrapper
+    @thunder_decorator
     def test_func2(arg1, arg2, arg3, arg4):
         return 1, arg2, 3, 4
 
