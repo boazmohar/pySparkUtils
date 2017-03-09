@@ -112,11 +112,20 @@ def watch(func):
         p.start()
         # get the status of all current stages
         status = sc.statusTracker()
+
         while result.empty():
+            flag = False
             ids = status.getJobIdsForGroup()
+            if not result.empty():
+                break
             for current in ids:
                 job = status.getJobInfo(current)
+                if not result.empty() or flag:
+                    break
                 for sid in job.stageIds:
+                    if not result.empty():
+                        flag = True
+                        break
                     info = status.getStageInfo(sid)
                     if info:
                         if info.numFailedTasks > 0:
