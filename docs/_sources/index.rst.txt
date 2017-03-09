@@ -1,10 +1,10 @@
-.. Docs documentation master file, created by
-   sphinx-quickstart on Wed Mar  8 16:58:04 2017.
+.. pySparkUtils documentation master file, created by
+   sphinx-quickstart on Thu Mar  9 16:49:37 2017.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Docs's documentation!
-================================
+Welcome to pySparkUtils's documentation!
+========================================
 
 .. toctree::
    :maxdepth: 2

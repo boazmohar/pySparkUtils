@@ -66,8 +66,9 @@ def change(sc=None, app_name='customSpark', master=None, wait_for_sc=True, timeo
 
 def fallback(func):
     """ Decorator function for functions that handle spark context.
-        If a function changes sc we might lose it if an error occurs in the function.
-        In the event of an error this decorator will log the error but return sc.
+    If a function changes sc we might lose it if an error occurs in the function.
+    In the event of an error this decorator will log the error but return sc.
+
     :param func: function to decorate
     :return: decorated function
     """
@@ -90,10 +91,11 @@ def fallback(func):
 
 def watch(func):
     """ Decorator that will abort all running spark jobs if there are failed tasks.
-        It will lunch the decorated function in a different process as a daemon.
-        It assumes a input variable in the decorated function of type SparkContext.
-        If failed tasks are found, the process is terminated and all current scheduled jobs are aborted the function
-        will return None
+    It will lunch the decorated function in a different process as a daemon.
+    It assumes a input variable in the decorated function of type SparkContext.
+    If failed tasks are found, the process is terminated and all current scheduled jobs are aborted the function
+    will return None
+
     :param func: function to decorate
     :return: decorated function
     """
@@ -141,11 +143,12 @@ def watch(func):
 
 
 def thunder_decorator(func):
-    """ decorator for functions so they could get as input a thunder.Images / thunder.Series object,
-       while they are expecting an rdd. Also will return the data from rdd to the appropriate type
-       Assumes only one input object of type Images/Series, and up to one output object of type RDD
-       :param func: function to decorate
-       :return: decorated function
+    """ Decorator for functions so they could get as input a thunder.Images / thunder.Series object,
+    while they are expecting an rdd. Also will return the data from rdd to the appropriate type
+    Assumes only one input object of type Images/Series, and up to one output object of type RDD
+
+    :param func: function to decorate
+    :return: decorated function
     """
     def dec(*args, **kwargs):
         # find Images / Series object in args
@@ -231,13 +234,18 @@ def thunder_decorator(func):
             return result[0]
         else:
             return result
+
+    dec.__doc__ = func.__doc__
+    dec.__repr__ = func.__repr__
     return dec
 
 
 @thunder_decorator
 def balanced_repartition(data, partitions):
-    """ Reparations an RDD making sure data is evenly distributed across partitions
+    """ balanced_repartition(data, partitions)
+    Reparations an RDD making sure data is evenly distributed across partitions
     for Spark version < 2.1 (see: https://issues.apache.org/jira/browse/SPARK-17817)
+
     :param data: RDD
     :param partitions: number of partition to use
     :return: repartitioned data
@@ -256,7 +264,7 @@ def balanced_repartition(data, partitions):
 
 @thunder_decorator
 def regroup(rdd, groups=10, check_first=False):
-    """ regroup an rdd using a new key added that is 0-numGtoup-1
+    """ Regroup an rdd using a new key added that is 0-numGtoup-1
 
     :param rdd: input rdd as a (k,v) pairs
     :param groups: number of groups to concatenate to
@@ -304,7 +312,7 @@ def save_rdd_as_pickle(rdd, path, batch_size=10, overwrite=False):
 
 
 def load_rdd_from_pickle(sc, path, min_partitions=None, return_type='images'):
-    """ Loads an rdd that was saved as one pickle file per partition
+    """  Loads an rdd that was saved as one pickle file per partition
 
     :param sc: Spark Context
     :param path: directory to load from

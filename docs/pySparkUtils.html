@@ -1,0 +1,298 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pySparkUtils package &#8212; pySparkUtils 0.1.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pysparkutils-package">
+<h1>pySparkUtils package<a class="headerlink" href="#pysparkutils-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pySparkUtils.utils">
+<span id="pysparkutils-utils-module"></span><h2>pySparkUtils.utils module<a class="headerlink" href="#module-pySparkUtils.utils" title="Permalink to this headline">¶</a></h2>
+<p>A set of utilities to manage pySpark SparkContext object
+Assumes you have pyspark (and py4j) on the PYTHONPATH and SPARK_HOME is defined</p>
+<dl class="function">
+<dt id="pySparkUtils.utils.balanced_repartition">
+<code class="descclassname">pySparkUtils.utils.</code><code class="descname">balanced_repartition</code><span class="sig-paren">(</span><em>data</em>, <em>partitions</em><span class="sig-paren">)</span><a class="headerlink" href="#pySparkUtils.utils.balanced_repartition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reparations an RDD making sure data is evenly distributed across partitions
+for Spark version &lt; 2.1 (see: <a class="reference external" href="https://issues.apache.org/jira/browse/SPARK-17817">https://issues.apache.org/jira/browse/SPARK-17817</a>)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> &#8211; RDD</li>
+<li><strong>partitions</strong> &#8211; number of partition to use</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">repartitioned data</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pySparkUtils.utils.change">
+<code class="descclassname">pySparkUtils.utils.</code><code class="descname">change</code><span class="sig-paren">(</span><em>sc=None</em>, <em>app_name='customSpark'</em>, <em>master=None</em>, <em>wait_for_sc=True</em>, <em>timeout=30</em>, <em>fail_on_timeout=True</em>, <em>refresh_rate=0.5</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pySparkUtils.utils.change" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a new Spark Context (sc) object with added properties set</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sc</strong> &#8211; current SparkContext</li>
+<li><strong>app_name</strong> &#8211; name of new spark app</li>
+<li><strong>master</strong> &#8211; url to master, if None will get from current sc</li>
+<li><strong>kwargs</strong> &#8211; added properties to set. In the form of key value pairs (replaces &#8216;.&#8217; with &#8216;_&#8217; in key)
+examples: spark_task_cores=&#8216;1&#8217;, spark_python_worker_memory=&#8216;8g&#8217;
+see: <a class="reference external" href="http://spark.apache.org/docs/latest/configuration.html">http://spark.apache.org/docs/latest/configuration.html</a></li>
+<li><strong>wait_for_sc</strong> &#8211; if to hold on returning until defaultParallelism is back to original value or timeout seconds</li>
+<li><strong>timeout</strong> &#8211; max time in seconds to wait for new sc</li>
+<li><strong>fail_on_timeout</strong> &#8211; whether to assert that defaultParallelism got back to a value greater then original after
+timeout has finished</li>
+<li><strong>refresh_rate</strong> &#8211; how long to wait in seconds between each check of the defaultParallelism</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new SparkContext</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pySparkUtils.utils.fallback">
+<code class="descclassname">pySparkUtils.utils.</code><code class="descname">fallback</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#pySparkUtils.utils.fallback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator function for functions that handle spark context.
+If a function changes sc we might lose it if an error occurs in the function.
+In the event of an error this decorator will log the error but return sc.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func</strong> &#8211; function to decorate</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">decorated function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pySparkUtils.utils.load_rdd_from_pickle">
+<code class="descclassname">pySparkUtils.utils.</code><code class="descname">load_rdd_from_pickle</code><span class="sig-paren">(</span><em>sc</em>, <em>path</em>, <em>min_partitions=None</em>, <em>return_type='images'</em><span class="sig-paren">)</span><a class="headerlink" href="#pySparkUtils.utils.load_rdd_from_pickle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads an rdd that was saved as one pickle file per partition</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sc</strong> &#8211; Spark Context</li>
+<li><strong>path</strong> &#8211; directory to load from</li>
+<li><strong>min_partitions</strong> &#8211; minimum number of partitions. if None will be sc.defaultParallelism</li>
+<li><strong>return_type</strong> &#8211; what to return. &#8216;rdd&#8217; - RDD, &#8216;images&#8217; - Thunder Images object, &#8216;series&#8217; - Thunder Series object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">based on return type.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pySparkUtils.utils.regroup">
+<code class="descclassname">pySparkUtils.utils.</code><code class="descname">regroup</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pySparkUtils.utils.regroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Regroup an rdd using a new key added that is 0-numGtoup-1</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rdd</strong> &#8211; input rdd as a (k,v) pairs</li>
+<li><strong>groups</strong> &#8211; number of groups to concatenate to</li>
+<li><strong>check_first</strong> &#8211; check if first value is a key value pair.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new rdd in the form of (groupNum, list of (k, v) in that group) pairs</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Example:
+&gt;&gt;&gt;data = sc.parallelize(zip(range(4), range(4)))
+&gt;&gt;&gt;data.collect()
+&gt;&gt;&gt; [(0, 0), (1, 1), (2, 2), (3, 3)]
+&gt;&gt;&gt;data2 = regroup(data, 2)
+&gt;&gt;&gt;data2.collect()
+&gt;&gt;&gt; [(0, [(0, 0), (2, 2)]), (1, [(1, 1), (3, 3)])]</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pySparkUtils.utils.save_rdd_as_pickle">
+<code class="descclassname">pySparkUtils.utils.</code><code class="descname">save_rdd_as_pickle</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pySparkUtils.utils.save_rdd_as_pickle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves an rdd by grouping all the records of each partition as one pickle file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>rdd</strong> &#8211; rdd to save</li>
+<li><strong>path</strong> &#8211; where to save</li>
+<li><strong>batch_size</strong> &#8211; batch size to pass to spark saveAsPickleFile</li>
+<li><strong>overwrite</strong> &#8211; if directory exist whether to overwrite</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pySparkUtils.utils.thunder_decorator">
+<code class="descclassname">pySparkUtils.utils.</code><code class="descname">thunder_decorator</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#pySparkUtils.utils.thunder_decorator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator for functions so they could get as input a thunder.Images / thunder.Series object,
+while they are expecting an rdd. Also will return the data from rdd to the appropriate type
+Assumes only one input object of type Images/Series, and up to one output object of type RDD</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func</strong> &#8211; function to decorate</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">decorated function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pySparkUtils.utils.watch">
+<code class="descclassname">pySparkUtils.utils.</code><code class="descname">watch</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#pySparkUtils.utils.watch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator that will abort all running spark jobs if there are failed tasks.
+It will lunch the decorated function in a different process as a daemon.
+It assumes a input variable in the decorated function of type SparkContext.
+If failed tasks are found, the process is terminated and all current scheduled jobs are aborted the function
+will return None</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func</strong> &#8211; function to decorate</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">decorated function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pySparkUtils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pySparkUtils" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">pySparkUtils package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-pySparkUtils.utils">pySparkUtils.utils module</a></li>
+<li><a class="reference internal" href="#module-pySparkUtils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/pySparkUtils.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Boaz Mohar.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/pySparkUtils.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

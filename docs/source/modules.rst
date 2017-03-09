@@ -5,4 +5,3 @@ pySparkUtils
    :maxdepth: 4
 
    pySparkUtils
-   setup
