@@ -98,7 +98,6 @@ def watch(func):
         result = Queue(1)
         p = Process(target=lambda: result.put(func(*args, **kwargs)))
         p.daemon = True
-        p.start()
 
         # find sc variable from input params
         sc=None
@@ -106,9 +105,8 @@ def watch(func):
             if isinstance(item, SparkContext):
                 sc = item
         if sc is None:
-            p.terminate()
             raise ValueError('Could not find sc in the input params')
-
+        p.start()
         # get the status of all current stages
         status = sc.statusTracker()
         while result.empty():
