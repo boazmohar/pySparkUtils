@@ -17,10 +17,10 @@ def test_watch_no_sc():
 def test_watch_no_fail(eng):
     @watch
     def test_func(sc):
-        result = sc.parallelize(range(10)).reduce(lambda x, y: x+y)
+        result = sc.parallelize(range(1000)).reduce(lambda x, y: x+y)
         return result
     answer = test_func(eng)
-    assert answer == sum(range(10))
+    assert answer == sum(range(1000))
 
 
 def test_watch_fail(eng):
