@@ -74,7 +74,7 @@ def fallback(func):
         try:
             return func(*args, **kwargs)
         except Exception as e:
-            logging.getLogger('pySparkUtils').error('Decorator handled exception %s' % e)
+            logging.getLogger('pySparkUtils').error('Decorator handled exception %s' % e, exc_info=True)
             _, _, tb = sys.exc_info()
             while tb.tb_next:
                 tb = tb.tb_next
@@ -82,7 +82,7 @@ def fallback(func):
             for key, value in iteritems(frame.f_locals):
                 if isinstance(value, SparkContext) and value._jsc is not None:
                     return frame.f_locals[key]
-            logging.getLogger('pySparkUtils').error('Could not find SparkContext')
+            logging.getLogger('pySparkUtils').error('Could not find SparkContext', exc_info=True)
             return None
     return dec
 
@@ -129,7 +129,8 @@ def watch(func):
                     info = status.getStageInfo(sid)
                     if info:
                         if info.numFailedTasks > 0:
-                            logging.getLogger('pySparkUtils').error('Found failed tasks in %s' % func)
+                            logging.getLogger('pySparkUtils').info(info)
+                            logging.getLogger('pySparkUtils').error('Found failed tasks at: %s' % info.name)
                             sc.cancelAllJobs()
                             p.terminate()
                             return None
