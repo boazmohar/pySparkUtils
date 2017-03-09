@@ -1,2 +1,2 @@
-thunder
+thunder-python
 future
