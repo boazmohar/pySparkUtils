@@ -139,9 +139,9 @@ def thunder_wrapper(func):
     def dec(*args, **kwargs):
         # find Images / Series object in args
         args = list(args)
-        image_args = map(lambda x: isinstance(x, td.images.Images), args)
-        series_args = map(lambda x: isinstance(x, td.series.Series), args)
-        rdd_args = map(lambda x: isinstance(x, RDD), args)
+        image_args = list(map(lambda x: isinstance(x, td.images.Images), args))
+        series_args = list(map(lambda x: isinstance(x, td.series.Series), args))
+        rdd_args = list(map(lambda x: isinstance(x, RDD), args))
 
         #find Images / Series object in kwargs
         image_kwargs = []
@@ -166,7 +166,7 @@ def thunder_wrapper(func):
         # bypass for RDD
         if  sum(rdd_args) or len(rdd_kwargs):
             return func(*args, **kwargs)
-
+        image_flag = None
         # convert to rdd and send
         if sum(image_args) > 0:
             image_flag = True
@@ -189,11 +189,14 @@ def thunder_wrapper(func):
             kwargs[series_kwargs[0]] = kwargs[series_kwargs[0]].tordd()
             result = func(*args, **kwargs)
 
+        if image_flag is None:
+            print(sum(image_args))
+            print(sum(series_args))
         #handle output
         if not isinstance(result, tuple):
             result = (result,)
         result_len = len(result)
-        rdd_index = np.where(map(lambda x: isinstance(x, RDD), result))[0]
+        rdd_index = np.where(list(map(lambda x: isinstance(x, RDD), result)))[0]
         # no RDD as output
         if len(rdd_index) == 0:
             logging.getLogger('pySparkUtils').debug('No RDDs found in output')
