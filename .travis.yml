@@ -17,7 +17,7 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a
-  - conda create --yes -q -n test python=$TRAVIS_PYTHON_VERSION pip pytest
+  - conda create --yes -q -n test python=$TRAVIS_PYTHON_VERSION pip pytest numpy scipy
   - source activate test
   - pip install -r requirements-dev.txt
   - wget http://d3kbcqa49mib13.cloudfront.net/spark-2.1.0-bin-hadoop2.7.tgz
