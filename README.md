@@ -16,7 +16,7 @@ Tested on Spark 2.1 with python 2.7 and 3.5
 
 ## documentation
 
-[API Documentation](https://boazmohar.github.io/pySparkUtils/source/pySparkUtils.html)
+[API Documentation](https://boazmohar.github.io/pySparkUtils/pySparkUtils.html#module-pySparkUtils.utils)
 
 ## contributing
 
