@@ -3,7 +3,7 @@ import pytest
 import time
 pytestmark = pytest.mark.usefixtures("eng")
 
-def test_watch_no_sc():
+def test_no_sc():
     @watch
     def test_func(sleep_time):
         time.sleep(sleep_time)
@@ -13,7 +13,7 @@ def test_watch_no_sc():
     assert 'Could not find sc in the input params' in str(excinfo.value)
 
 
-def test_watch_no_fail(eng):
+def test_no_fail(eng):
     @watch
     def test_func(sc):
         result = sc.parallelize(range(1000)).reduce(lambda x, y: x+y)
@@ -22,7 +22,7 @@ def test_watch_no_fail(eng):
     assert answer == sum(range(1000))
 
 
-def test_watch_fail(eng):
+def test_fail(eng):
     @watch
     def test_func(sc):
         def failing(x):

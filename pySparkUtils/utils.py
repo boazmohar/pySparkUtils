@@ -4,11 +4,13 @@ Assumes you have pyspark (and py4j) on the PYTHONPATH and SPARK_HOME is defined
 from future.utils import iteritems
 import logging
 import time
+import shutil
 import sys
+import os
 import thunder as td
-import pyspark
+import numpy as np
 from multiprocessing import Process, Queue
-from pyspark import SparkContext, SparkConf
+from pyspark import SparkContext, SparkConf, RDD
 
 
 def change(sc=None, app_name='customSpark', master=None, wait_for_sc=True, timeout=30, fail_on_timeout=True,
@@ -127,27 +129,161 @@ def watch(func):
     return dec
 
 
-def balanced_repartition(data, partitions):
-    """ Reparations an RDD or thunder object but making sure data is evenly distributed across partitions
-    for Spark version < 2.1 (see: https://issues.apache.org/jira/browse/SPARK-17817)
-    :param data: RDD or Thunder Images / Series object
-    :param partitions: number of partition to use
-    :return: repartitioned data with the same type
+def thunder_wrapper(func):
+    """ decorator for functions so they could get as input a thunder.Images / thunder.Series object,
+    while they are expecting an rdd. Also will return the data from rdd to the appropriate type
+    Assumes only one input object of type Images/Series, and one output object of type RDD
+    :param func: function to decorate
+    :return: decorated function
     """
-    def repartition(data2, partitions_inner):
-        # repartition by zipping an index to the data, repartition by % on it and removing it
-        data2 = data2.zipWithIndex().map(lambda x: (x[1], x[0]))
-        data2 = data2.partitionBy(partitions_inner, lambda x: x % partitions_inner)
-        return data2.map(lambda x: x[1])
+    def dec(*args, **kwargs):
+        # find Images / Series object in args
+        args = list(args)
+        image_args = map(lambda x: isinstance(x, td.images.Images), args)
+        series_args = map(lambda x: isinstance(x, td.series.Series), args)
+        rdd_args = map(lambda x: isinstance(x, RDD), args)
 
-    if isinstance(data, (td.images.Images, td.series.Series)):
-        data2 = data.tordd()
-        data2 = repartition(data2, partitions)
-        if isinstance(data, td.series.Series):
-            return td.series.fromrdd(data2)
+        #find Images / Series object in kwargs
+        image_kwargs = []
+        series_kwargs = []
+        rdd_kwargs = []
+        for key, value in iteritems(kwargs):
+            if isinstance(value, td.images.Images):
+                image_kwargs.append(key)
+            if isinstance(value,  td.series.Series):
+                series_kwargs.append(key)
+            if isinstance(value,  RDD):
+                rdd_kwargs.append(key)
+
+        # make sure there is only one
+        count = sum(image_args) + sum(series_args) + sum(rdd_args) +\
+                len(image_kwargs) + len(series_kwargs) + len(rdd_kwargs)
+        if count == 0:
+            raise ValueError('Wrong data type, expected [RDD, Images, Series] got None')
+        if count > 1:
+            raise ValueError('Expecting on input argument of type Series / Images, got: %d' % count)
+
+        # bypass for RDD
+        if  sum(rdd_args) or len(rdd_kwargs):
+            return func(*args, **kwargs)
+
+        # convert to rdd and send
+        if sum(image_args) > 0:
+            image_flag = True
+            index = np.where(image_args)[0][0]
+            args[index] = args[index].tordd()
+            result = func(*args, **kwargs)
+        if sum(series_args) > 0:
+            image_flag = False
+            index = np.where(series_args)[0][0]
+            args[index] = args[index].tordd()
+            result = func(*args, **kwargs)
+
+        if len(image_kwargs) > 0:
+            image_flag = True
+            kwargs[image_kwargs[0]] = kwargs[image_kwargs[0]].tordd()
+            result = func(*args, **kwargs)
+
+        if len(series_kwargs) > 0:
+            image_flag = False
+            kwargs[series_kwargs[0]] = kwargs[series_kwargs[0]].tordd()
+            result = func(*args, **kwargs)
+
+        #handle output
+        if not isinstance(result, tuple):
+            result = (result,)
+        result_len = len(result)
+        rdd_index = np.where(map(lambda x: isinstance(x, RDD), result))[0]
+        # no RDD as output
+        if len(rdd_index) == 0:
+            logging.getLogger('pySparkUtils').debug('No RDDs found in output')
+            if result_len == 1:
+                return result[0]
+            else:
+                return result
+
+        if len(rdd_index) > 1:
+            raise ValueError('Expecting one RDD as output got: %d' % len(rdd_index))
+        result = list(result)
+        rdd_index = rdd_index[0]
+        if image_flag:
+            result[rdd_index] = td.images.fromrdd(result[rdd_index])
         else:
-            return td.images.fromrdd(data2)
-    elif isinstance(data, pyspark.RDD):
+            result[rdd_index] = td.series.fromrdd(result[rdd_index])
+
+        if result_len == 1:
+            return result[0]
+        else:
+            return result
+
+    return dec
+
+
+@thunder_wrapper
+def balanced_repartition(data, partitions):
+    """ Reparations an RDD making sure data is evenly distributed across partitions
+    for Spark version < 2.1 (see: https://issues.apache.org/jira/browse/SPARK-17817)
+    :param data: RDD
+    :param partitions: number of partition to use
+    :return: repartitioned data
+    """
+    def repartition(data_inner, partitions_inner):
+        # repartition by zipping an index to the data, repartition by % on it and removing it
+        data_inner = data_inner.zipWithIndex().map(lambda x: (x[1], x[0]))
+        data_inner = data_inner.partitionBy(partitions_inner, lambda x: x % partitions_inner)
+        return data_inner.map(lambda x: x[1])
+
+    if isinstance(data, RDD):
         return repartition(data, partitions)
     else:
         raise ValueError('Wrong data type, expected [RDD, Images, Series] got: %s' % type(data))
+
+
+@thunder_wrapper
+def regroup(rdd, groups=10):
+    """ regroup an rdd using a new key added that is 0-numGtoup-1
+
+    :param rdd: input rdd as a (k,v) pairs
+    :param groups: number of groups to concatenate to
+    :return: a new rdd in the form of (groupNum, list of (k, v) in that group) pairs
+    """
+    rdd = rdd.map(lambda kv: (kv[0] % groups, (kv[0], kv[1])), preservesPartitioning=True)
+    return rdd.groupByKey().mapValues(list)
+
+
+def saveRDDPickel(data, path, batch_size=10, overwrite=False):
+    """
+
+    :param data:
+    :param path:
+    :param batch_size:
+    :param overwrite:
+    :return:
+    """
+    if os.path.isdir(path):
+        if overwrite:
+            print('Deleting files from: %s' % path)
+            shutil.rmtree(path)
+            print('Done deleting files from: %s' % path)
+        else:
+            print('Directory %s already exists and overwrite is false' % path)
+            return
+    rdd = data.tordd().glom()
+    rdd.saveAsPickleFile(path, batchSize=batch_size)
+    print('Saved rdd to pickel to: %s' % path)
+
+
+def loadRDDPickel(sc, path, minPartitions=None):
+    """
+
+    :param sc:
+    :param path:
+    :param minPartitions:
+    :return:
+    """
+    if minPartitions is None:
+        minPartitions = sc.defaultParallelism
+    rdd = sc.pickleFile(path, minPartitions=minPartitions)
+    rdd = rdd.flatMap(lambda x: x)
+    return td.images.fromrdd(rdd).coalesce(minPartitions)
+    print('Loaded rdd to from: %s' % path)
