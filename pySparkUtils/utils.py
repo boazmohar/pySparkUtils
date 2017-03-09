@@ -304,7 +304,7 @@ def save_rdd_as_pickle(rdd, path, batch_size=10, overwrite=False):
 
 
 def load_rdd_from_pickle(sc, path, min_partitions=None, return_type='images'):
-    """ Loads an rdd that was saved as one pickel file per partition
+    """ Loads an rdd that was saved as one pickle file per partition
 
     :param sc: Spark Context
     :param path: directory to load from
@@ -317,11 +317,11 @@ def load_rdd_from_pickle(sc, path, min_partitions=None, return_type='images'):
     rdd = sc.pickleFile(path, minPartitions=min_partitions)
     rdd = rdd.flatMap(lambda x: x)
     if return_type == 'images':
-        result = td.images.fromrdd(rdd).coalesce(min_partitions)
+        result = td.images.fromrdd(rdd).repartition(min_partitions)
     elif  return_type == 'series':
-        result = td.series.fromrdd(rdd).coalesce(min_partitions)
+        result = td.series.fromrdd(rdd).repartition(min_partitions)
     elif  return_type == 'rdd':
-        result = rdd.coalesce(min_partitions)
+        result = rdd.repartition(min_partitions)
     else:
         raise ValueError('return_type not supported: %s' % return_type)
     logging.getLogger('pySparkUtils').info('Loaded rdd from: %s as type: %s' % (path, return_type))
