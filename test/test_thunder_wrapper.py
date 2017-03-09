@@ -12,7 +12,7 @@ def test_no_input():
         return 1
     with pytest.raises(ValueError) as excinfo:
         test_func(1, 2, arg3=3, arg4=4)
-    assert 'Expecting one input argument of type Series / Images, got None' in str(excinfo.value)
+    assert 'Wrong data type, expected [RDD, Images, Series] got' in str(excinfo.value)
 
 
 def test_two_inputs(eng):
