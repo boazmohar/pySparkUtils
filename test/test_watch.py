@@ -1,5 +1,4 @@
 from pySparkUtils.utils import watch
-from pyspark import SparkContext
 import pytest
 import time
 pytestmark = pytest.mark.usefixtures("eng")

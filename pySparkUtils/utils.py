@@ -5,7 +5,8 @@ from future.utils import iteritems
 import logging
 import time
 import sys
-
+import thunder as td
+import pyspark
 from multiprocessing import Process, Queue
 from pyspark import SparkContext, SparkConf
 
@@ -126,3 +127,29 @@ def watch(func):
             time.sleep(1)
         return result.get()
     return dec
+
+
+def balanced_repartition(data, partitions):
+    """ Reparations an RDD or thunder object but making sure data is evenly distributed across partitions
+    for Spark version < 2.1 (see: https://issues.apache.org/jira/browse/SPARK-17817)
+    :param data: RDD or Thunder Images / Series object
+    :param partitions: number of partition to use
+    :return: repartitioned data with the same type
+    """
+    def repartition(data2, partitions_inner):
+        # repartition by zipping an index to the data, repartition by % on it and removing it
+        data2 = data2.zipWithIndex().map(lambda x: (x[1], x[0]))
+        data2 = data2.partitionBy(partitions_inner, lambda x: x % partitions_inner)
+        return data2.map(lambda x: x[1])
+
+    if isinstance(data, (td.images.Images, td.series.Series)):
+        data2 = data.tordd()
+        data2 = repartition(data2, partitions)
+        if isinstance(data, td.series.Series):
+            return td.series.fromrdd(data2)
+        else:
+            return td.images.fromrdd(data2)
+    elif isinstance(data, pyspark.RDD):
+        return repartition(data, partitions)
+    else:
+        raise ValueError('Wrong data type, expected [RDD, Images, Series] got: %s' % type(data))
