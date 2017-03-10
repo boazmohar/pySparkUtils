@@ -1,2 +1,4 @@
 thunder-python
+numpy
+scipy
 future
