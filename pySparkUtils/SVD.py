@@ -48,16 +48,21 @@ class SVD(JavaModelWrapper):
         """ Returns a DenseMatrix whose columns are the right singular vectors of the SVD."""
         return self.call("V")
 
-def computeSVD(row_matrix, k, computeU=False, rCond=1e-9):
+def computeSVD(row_matrix, k, computeU=False, rCond=1e-9, sort=True, normalization='mean'):
     """
+
     Computes the singular value decomposition of the RowMatrix.
     The given row matrix A of dimension (m X n) is decomposed into U * s * V'T where
     * s: DenseVector consisting of square root of the eigenvalues (singular values) in descending order.
     * U: (m X k) (left singular vectors) is a RowMatrix whose columns are the eigenvectors of (A X A')
     * v: (n X k) (right singular vectors) is a Matrix whose columns are the eigenvectors of (A' X A)
-    :param k: number of singular values to keep. We might return less than k if there are numerically zero singular values.
+    :param k: number of singular values to keep. We might return less than k if there are numerically zero
+     singular values.
     :param computeU: Whether of not to compute U. If set to be True, then U is computed by A * V * sigma^-1
-    :param rCond: the reciprocal condition number. All singular values smaller than rCond * sigma(0) are treated as zero, where sigma(0) is the largest singular value.
+    :param rCond: the reciprocal condition number. All singular values smaller than rCond * sigma(0) are treated
+     as zero, where sigma(0) is the largest singular value.
+    :param sort: sort by key before using only values
+    param normalization: options are mean, nanmean, zscore, None
     :returns: SVD object
     """
     java_model = row_matrix._java_matrix_wrapper.call("computeSVD", int(k), computeU, float(rCond))
@@ -71,7 +76,7 @@ def getSVD(data, k, getComponents=False, getS=False, normalization='mean'):
     :param data: Thunder Images object
     :param k: number of components to keep
     :param getComponents: will return the components if true, otherwise will return None
-    :param normalization: options are mean, nanmean, zscore, None
+
     :returns: projections, components, s
     """
     if normalization == 'nanmean':
