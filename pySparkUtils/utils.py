@@ -8,27 +8,61 @@ import time
 import shutil
 import sys
 import os
+import json
 import thunder as td
 import numpy as np
 from multiprocessing import Process, Queue
 from pyspark import SparkContext, SparkConf, RDD
 
+# urllib python 2 / 3 import
+try:
+    from urllib2 import urlopen # python 2
+except ImportError:
+    from urllib.requests import urlopen # python 3
 
-def change(sc=None, app_name='customSpark', master=None, wait_for_sc=True, timeout=30, fail_on_timeout=True,
-          refresh_rate=0.5, **kwargs):
+
+def executor_ips(sc):
+    """ gets the unique ip addresses of the executors of the current application
+    This uses the REST API for the status web UI on the driver (http://spark.apache.org/docs/latest/monitoring.html)
+
+    :param sc: Spark context
+    :return: set of ip addresses
+    """
+    app_id = sc.getConf().get('spark.app.id')
+
+    # for getting the url (see: https://github.com/apache/spark/pull/15000)
+    try:
+        base_url = sc.uiWebUrl
+    except AttributeError:
+        base_url = sc._jsc.sc().uiWebUrl().get()
+
+    url = base_url + '/api/v1/applications/' + app_id + '/executors'
+    data = json.load(urlopen(url))
+    ips = set(map(lambda x: x[u'hostPort'].split(':')[0], data))
+    return ips
+
+
+def change(sc=None, app_name='customSpark', master=None, wait='ips', min_cores=None, min_ips=None, timeout=30,
+           refresh_rate=0.5, fail_on_timeout=False, **kwargs):
     """ Returns a new Spark Context (sc) object with added properties set
 
-    :param sc: current SparkContext
+    :param sc: current SparkContext if None will create a new one
     :param app_name: name of new spark app
     :param master: url to master, if None will get from current sc
+    :param wait: when to return after asking for a new sc (or max of timeout seconds):
+     'ips': wait for all the previous ips that were connected to return (needs sc to not be None)
+     'cores': wait for min_cores
+     None: return immediately
+    :param min_cores: when wait is 'cores' will wait until defaultParallelism is back to at least this value.
+     if None will be set to defaultParallelism.
+    :param min_ips: when wait is 'ips' will wait until number of unique executor ips is back to at least this value.
+     if None will be set to the what the original sc had.
+    :param timeout: max time in seconds to wait for new sc if wait is 'ips' or 'cores'
+    :param fail_on_timeout: whether to fail if timeout has reached
+    :param refresh_rate: how long to wait in seconds between each check of defaultParallelism
     :param kwargs:  added properties to set. In the form of key value pairs (replaces '.' with '_' in key)
                     examples: spark_task_cores='1', spark_python_worker_memory='8g'
                     see: http://spark.apache.org/docs/latest/configuration.html
-    :param wait_for_sc: if to hold on returning until defaultParallelism is back to original value or timeout seconds
-    :param timeout: max time in seconds to wait for new sc
-    :param fail_on_timeout: whether to assert that defaultParallelism got back to a value greater then original after
-                            timeout has finished
-    :param refresh_rate: how long to wait in seconds between each check of the defaultParallelism
     :return: a new SparkContext
     """
     # checking input
@@ -36,12 +70,25 @@ def change(sc=None, app_name='customSpark', master=None, wait_for_sc=True, timeo
         raise ValueError('Both master and sc are None')
     if master is None:
         master = sc.getConf().get(u'spark.master')
+    if wait == 'ips':
+        if sc is None:
+            if min_ips is None:
+                min_ips = 1
+        elif min_ips is None:
+            target_ips = len(executor_ips(sc))
+    elif wait == 'cores':
+        if sc is None:
+            logging.getLogger('pySparkUtils').info('Both sc and min_cores are None: setting target_cores to 2')
+            min_cores = 2
+        else:
+            min_cores = sc.defaultParallelism
+    elif wait is not None:
+        raise ValueError("wait should be: ['ips','cores',None] got: %s" % wait)
+
     if sc is not None:
-        logging.getLogger('pySparkUtils').info('Original sc with %d cores' % sc.defaultParallelism)
-        target_cores = sc.defaultParallelism
+        logging.getLogger('pySparkUtils').info('Stopping original sc with %d cores and %d executors' %
+                                               (sc.defaultParallelism,  len(executor_ips(sc))))
         sc.stop()
-    else:
-        target_cores = 2
 
     # building a new configuration with added arguments
     conf = SparkConf().setMaster(master).setAppName(app_name)
@@ -53,14 +100,22 @@ def change(sc=None, app_name='customSpark', master=None, wait_for_sc=True, timeo
 
     # starting the new context and waiting for defaultParallelism to get back to original value
     sc = SparkContext(conf=conf)
-    if wait_for_sc:
+    if wait == 'cores':
         total_time = 0
-        while sc.defaultParallelism < target_cores and total_time < timeout:
+        while sc.defaultParallelism < min_cores and total_time < timeout:
             time.sleep(refresh_rate)
             total_time += refresh_rate
-        if fail_on_timeout:
-            assert target_cores <= sc.defaultParallelism
-    logging.getLogger('pySparkUtils').info('Returning new sc with %d cores' % sc.defaultParallelism)
+        if fail_on_timeout and total_time >= timeout:
+            raise RuntimeError('Time out reached when changing sc')
+    elif wait == 'ips':
+        total_time = 0
+        while len(executor_ips(sc)) < min_ips and total_time < timeout:
+            time.sleep(refresh_rate)
+            total_time += refresh_rate
+        if fail_on_timeout and total_time >= timeout:
+            raise RuntimeError('Time out reached when changing sc')
+    logging.getLogger('pySparkUtils').info('Returning new sc with %d cores and %d executors' %
+                                           (sc.defaultParallelism, len(executor_ips(sc))))
     return sc
 
 

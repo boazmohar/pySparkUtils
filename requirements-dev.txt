@@ -3,3 +3,4 @@ numpy
 scipy
 future
 pytest
+mock
