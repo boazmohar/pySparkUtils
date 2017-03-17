@@ -3,6 +3,7 @@ import pytest
 import thunder as td
 import numpy as np
 from pyspark import RDD
+
 pytestmark = pytest.mark.usefixtures("eng")
 
 
@@ -13,7 +14,7 @@ def test_wrong_type():
 
 
 def test_thunder_images(eng):
-    array = np.random.rand(10,20,30)
+    array = np.random.rand(10, 20, 30)
     data = td.images.fromarray(array, engine=eng, npartitions=2)
     assert data.tordd().glom().map(len).collect() == [5, 5]
     data2 = balanced_repartition(data, 5)
@@ -22,7 +23,7 @@ def test_thunder_images(eng):
 
 
 def test_thunder_series(eng):
-    array = np.random.rand(10,20,30)
+    array = np.random.rand(10, 20, 30)
     data = td.series.fromarray(array, engine=eng, npartitions=2)
     assert data.tordd().glom().map(len).collect() == [100, 100]
     data2 = balanced_repartition(data, 5)

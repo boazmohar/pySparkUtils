@@ -72,10 +72,10 @@ def test_partitions(eng, tmpdir):
     data = td.images.fromrandom(engine=eng)
     path = os.path.join(tmpdir.dirname, 'test6')
     save_rdd_as_pickle(data, path)
-    reloaded = load_rdd_from_pickle(eng, path, min_partitions=eng.defaultParallelism*2)
+    reloaded = load_rdd_from_pickle(eng, path,
+                                    min_partitions=eng.defaultParallelism*2)
     data_local = data.toarray()
     reloaded_local = reloaded.toarray()
     assert np.allclose(data_local, reloaded_local)
     assert data_local.dtype == reloaded_local.dtype
     assert reloaded.npartitions() == eng.defaultParallelism*2
-

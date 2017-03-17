@@ -13,6 +13,7 @@ from scipy.stats.mstats import zscore
 import numpy as np
 from pySparkUtils.utils import thunder_decorator
 
+
 class RowMatrix_new(RowMatrix):
     def multiply(self, matrix):
         """
@@ -29,11 +30,15 @@ class RowMatrix_new(RowMatrix):
         j_model = self._java_matrix_wrapper.call("multiply", matrix)
         return RowMatrix_new(j_model)
 
+
 class SVD(JavaModelWrapper):
     """Wrapper around the SVD scala case class"""
+
     @property
     def U(self):
-        """ Returns a RowMatrix whose columns are the left singular vectors of the SVD if computeU was set to be True."""
+        """
+        Returns a RowMatrix whose columns are the left singular vectors of the SVD if computeU was set to be True.
+        """
         u = self.call("U")
         if u is not None:
             return RowMatrix(u)
@@ -48,7 +53,8 @@ class SVD(JavaModelWrapper):
         """ Returns a DenseMatrix whose columns are the right singular vectors of the SVD."""
         return self.call("V")
 
-def computeSVD(row_matrix, k, computeU=False, rCond=1e-9, sort=True, normalization='mean'):
+
+def compute_svd(row_matrix, k, compute_u=False, r_cond=1e-9, sort=True, normalization='mean'):
     """
 
     Computes the singular value decomposition of the RowMatrix.
@@ -99,7 +105,7 @@ def getSVD(data, k, getComponents=False, getS=False, normalization='mean'):
         components = components.transpose(1, 0).reshape((k,) + data.shape[1:])
     else:
         components = None
-    projection =  np.array(RowMatrix_new(data2).multiply(svd.call("V")).rows.collect())
+    projection = np.array(RowMatrix_new(data2).multiply(svd.call("V")).rows.collect())
     if getS:
         s = svd.call("s").toArray()
     else:

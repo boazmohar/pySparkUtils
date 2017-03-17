@@ -3,6 +3,7 @@ import pytest
 import time
 pytestmark = pytest.mark.usefixtures("eng")
 
+
 def test_no_sc():
     @watch
     def test_func(sleep_time):
@@ -13,6 +14,8 @@ def test_no_sc():
     assert 'Could not find sc in the input params' in str(excinfo.value)
 
 
+@pytest.mark.skipif(multiprocessing.cpu_count() < 2,
+                    reason="requires more then 2 cores")
 def test_no_fail_long(eng):
     @watch
     def test_func(sc):

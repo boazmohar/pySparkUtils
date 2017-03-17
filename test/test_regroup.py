@@ -6,7 +6,7 @@ pytestmark = pytest.mark.usefixtures("eng")
 def test_regroup(eng):
     data = eng.parallelize(zip(range(4), range(4)))
     data2 = regroup(data, 2).collect()
-    assert data2 ==  [(0, [(0, 0), (2, 2)]), (1, [(1, 1), (3, 3)])]
+    assert data2 == [(0, [(0, 0), (2, 2)]), (1, [(1, 1), (3, 3)])]
 
 
 def test_not_key_value(eng):

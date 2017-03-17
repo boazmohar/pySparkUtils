@@ -1,10 +1,12 @@
 from pySparkUtils.utils import fallback, change
 import pytest
+
 pytestmark = pytest.mark.usefixtures("eng")
 
 
 def test_fail(eng):
     target_cores = eng.defaultParallelism
+
     @fallback
     def test_func(sc_inner):
         new_sc = change(sc_inner)
@@ -17,6 +19,7 @@ def test_fail(eng):
 
 def test_pass(eng):
     target_cores = eng.defaultParallelism
+
     @fallback
     def test_func(sc_inner):
         new_sc = change(sc_inner)

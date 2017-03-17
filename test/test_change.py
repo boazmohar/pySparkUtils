@@ -3,10 +3,12 @@ from pySparkUtils.utils import change
 import pytest
 pytestmark = pytest.mark.usefixtures("eng")
 
+
 def test_no_input():
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError) as ex:
         change(sc=None, master=None)
-    assert 'Both master and sc are None' in str(excinfo.value)
+    assert 'Both master and sc are None' in str(ex.value)
+
 
 def test_cores(eng):
     n_cores = eng.defaultParallelism
@@ -14,11 +16,13 @@ def test_cores(eng):
     assert new_sc.defaultParallelism == n_cores
     new_sc.stop()
 
+
 def test_local(eng):
     eng.stop()
     new_sc = change(sc=None, master='local[2]', fail_on_timeout=False)
     assert new_sc.defaultParallelism == 2
     new_sc.stop()
+
 
 def test_args(eng):
     old_conf = eng.getConf()

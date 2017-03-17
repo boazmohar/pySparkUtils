@@ -16,28 +16,31 @@ from pyspark import SparkContext, SparkConf, RDD
 
 # urllib python 2 / 3 import
 try:
-    from urllib2 import urlopen # python 2
+    import urllib2  # python 2
 except ImportError:
-    from urllib.requests import urlopen # python 3
+    import urllib.requests as urllib2  # python 3
 
 
 def executor_ips(sc):
     """ gets the unique ip addresses of the executors of the current application
-    This uses the REST API for the status web UI on the driver (http://spark.apache.org/docs/latest/monitoring.html)
+    This uses the REST API of the status web UI on the driver (http://spark.apache.org/docs/latest/monitoring.html)
 
     :param sc: Spark context
     :return: set of ip addresses
     """
-    app_id = sc.getConf().get('spark.app.id')
-
+    try:
+        app_id = sc.applicationId
+    except AttributeError:
+        app_id = sc.getConf().get('spark.app.id')
+    print(app_id)
     # for getting the url (see: https://github.com/apache/spark/pull/15000)
     try:
         base_url = sc.uiWebUrl
     except AttributeError:
         base_url = sc._jsc.sc().uiWebUrl().get()
-
+    print(base_url)
     url = base_url + '/api/v1/applications/' + app_id + '/executors'
-    data = json.load(urlopen(url))
+    data = json.load(urllib2.urlopen(url))
     ips = set(map(lambda x: x[u'hostPort'].split(':')[0], data))
     return ips
 
@@ -75,7 +78,7 @@ def change(sc=None, app_name='customSpark', master=None, wait='ips', min_cores=N
             if min_ips is None:
                 min_ips = 1
         elif min_ips is None:
-            target_ips = len(executor_ips(sc))
+            min_ips = len(executor_ips(sc))
     elif wait == 'cores':
         if sc is None:
             logging.getLogger('pySparkUtils').info('Both sc and min_cores are None: setting target_cores to 2')
@@ -87,7 +90,7 @@ def change(sc=None, app_name='customSpark', master=None, wait='ips', min_cores=N
 
     if sc is not None:
         logging.getLogger('pySparkUtils').info('Stopping original sc with %d cores and %d executors' %
-                                               (sc.defaultParallelism,  len(executor_ips(sc))))
+                                               (sc.defaultParallelism, len(executor_ips(sc))))
         sc.stop()
 
     # building a new configuration with added arguments
@@ -127,6 +130,7 @@ def fallback(func):
     :param func: function to decorate
     :return: decorated function
     """
+
     def dec(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -141,6 +145,7 @@ def fallback(func):
                     return frame.f_locals[key]
             logging.getLogger('pySparkUtils').error('Could not find SparkContext', exc_info=True)
             return None
+
     return dec
 
 
@@ -154,6 +159,7 @@ def watch(func):
     :param func: function to decorate
     :return: decorated function
     """
+
     def dec(*args, **kwargs):
         # lunch decorated function in a separate thread
         result = Queue(1)
@@ -161,39 +167,42 @@ def watch(func):
         p.daemon = True
 
         # find sc variable from input params
-        sc=None
+        sc = None
         for item in tuple(args) + tuple(kwargs.values()):
             if isinstance(item, SparkContext):
                 sc = item
         if sc is None:
             raise ValueError('Could not find sc in the input params')
 
-        # get the status of all current stages
+        group_name = 'watch_' + func.__name__
+        sc.setJobGroup(group_name, '', True)
         status = sc.statusTracker()
         p.start()
+        time.sleep(1)
+
+        # get the status of all current stages
         while result.empty():
-            flag = False
-            ids = status.getJobIdsForGroup()
-            if not result.empty():
-                break
-            for current in ids:
+            print(1)
+            jobIds = status.getJobIdsForGroup(group_name)
+            for current in jobIds:
+                print(2)
                 job = status.getJobInfo(current)
-                if not result.empty() or flag:
-                    break
                 for sid in job.stageIds:
-                    if not result.empty():
-                        flag = True
-                        break
+                    print(3)
                     info = status.getStageInfo(sid)
                     if info:
+                        print(4)
                         if info.numFailedTasks > 0:
                             logging.getLogger('pySparkUtils').info(info)
                             logging.getLogger('pySparkUtils').error('Found failed tasks at: %s' % info.name)
                             sc.cancelAllJobs()
                             p.terminate()
                             return None
-            time.sleep(1)
+            time.sleep(0.1)
+            print(6)
+            print(result.empty())
         return result.get()
+
     return dec
 
 
@@ -205,35 +214,37 @@ def thunder_decorator(func):
     :param func: function to decorate
     :return: decorated function
     """
+
     def dec(*args, **kwargs):
         # find Images / Series object in args
+        result = None
         args = list(args)
         image_args = list(map(lambda x: isinstance(x, td.images.Images), args))
         series_args = list(map(lambda x: isinstance(x, td.series.Series), args))
         rdd_args = list(map(lambda x: isinstance(x, RDD), args))
 
-        #find Images / Series object in kwargs
+        # find Images / Series object in kwargs
         image_kwargs = []
         series_kwargs = []
         rdd_kwargs = []
         for key, value in iteritems(kwargs):
             if isinstance(value, td.images.Images):
                 image_kwargs.append(key)
-            if isinstance(value,  td.series.Series):
+            if isinstance(value, td.series.Series):
                 series_kwargs.append(key)
-            if isinstance(value,  RDD):
+            if isinstance(value, RDD):
                 rdd_kwargs.append(key)
 
         # make sure there is only one
-        count = sum(image_args) + sum(series_args) + sum(rdd_args) +\
-                len(image_kwargs) + len(series_kwargs) + len(rdd_kwargs)
+        count = sum(image_args) + sum(series_args) + sum(rdd_args) + len(image_kwargs) + len(series_kwargs) + \
+            len(rdd_kwargs)
         if count == 0:
             raise ValueError('Wrong data type, expected [RDD, Images, Series] got None')
         if count > 1:
             raise ValueError('Expecting on input argument of type Series / Images, got: %d' % count)
 
         # bypass for RDD
-        if  sum(rdd_args) or len(rdd_kwargs):
+        if sum(rdd_args) or len(rdd_kwargs):
             return func(*args, **kwargs)
         image_flag = None
         # convert to rdd and send
@@ -261,7 +272,7 @@ def thunder_decorator(func):
         if image_flag is None:
             raise RuntimeError('Target function did not run')
 
-        #handle output
+        # handle output
         if not isinstance(result, tuple):
             result = (result,)
         result_len = len(result)
@@ -305,6 +316,7 @@ def balanced_repartition(data, partitions):
     :param partitions: number of partition to use
     :return: repartitioned data
     """
+
     def repartition(data_inner, partitions_inner):
         # repartition by zipping an index to the data, repartition by % on it and removing it
         data_inner = data_inner.zipWithIndex().map(lambda x: (x[1], x[0]))
@@ -319,7 +331,7 @@ def balanced_repartition(data, partitions):
 
 @thunder_decorator
 def regroup(rdd, groups=10, check_first=False):
-    """ Regroup an rdd using a new key added that is 0-numGtoup-1
+    """ Regroup an rdd using a new key added that is 0 ... number of groups - 1
 
     :param rdd: input rdd as a (k,v) pairs
     :param groups: number of groups to concatenate to
@@ -360,8 +372,10 @@ def save_rdd_as_pickle(rdd, path, batch_size=10, overwrite=False):
             shutil.rmtree(path)
             logging.getLogger('pySparkUtils').info('Done deleting files from: %s' % path)
         else:
-            logging.getLogger('pySparkUtils').error('Directory %s already exists and overwrite is false' % path)
-            raise IOError('Directory %s already exists and overwrite is false' % path)
+            logging.getLogger('pySparkUtils').error('Directory %s already exists '
+                                                    'and overwrite is false' % path)
+            raise IOError('Directory %s already exists and overwrite is false'
+                          % path)
     rdd.glom().saveAsPickleFile(path, batchSize=batch_size)
     logging.getLogger('pySparkUtils').info('Saved rdd as pickle to: %s' % path)
 
@@ -371,8 +385,12 @@ def load_rdd_from_pickle(sc, path, min_partitions=None, return_type='images'):
 
     :param sc: Spark Context
     :param path: directory to load from
-    :param min_partitions: minimum number of partitions. if None will be sc.defaultParallelism
-    :param return_type: what to return. 'rdd' - RDD, 'images' - Thunder Images object, 'series' - Thunder Series object
+    :param min_partitions: minimum number of partitions.
+    f None will be sc.defaultParallelism
+    :param return_type: what to return:
+    'rdd' - RDD
+    'images' - Thunder Images object
+    'series' - Thunder Series object
     :return: based on return type.
     """
     if min_partitions is None:
@@ -381,11 +399,12 @@ def load_rdd_from_pickle(sc, path, min_partitions=None, return_type='images'):
     rdd = rdd.flatMap(lambda x: x)
     if return_type == 'images':
         result = td.images.fromrdd(rdd).repartition(min_partitions)
-    elif  return_type == 'series':
+    elif return_type == 'series':
         result = td.series.fromrdd(rdd).repartition(min_partitions)
-    elif  return_type == 'rdd':
+    elif return_type == 'rdd':
         result = rdd.repartition(min_partitions)
     else:
         raise ValueError('return_type not supported: %s' % return_type)
-    logging.getLogger('pySparkUtils').info('Loaded rdd from: %s as type: %s' % (path, return_type))
+    logging.getLogger('pySparkUtils').info('Loaded rdd from: %s as type: %s'
+                                           % (path, return_type))
     return result

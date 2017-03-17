@@ -3,4 +3,7 @@ numpy
 scipy
 future
 pytest
+pytest-rerunfailures
+pytest-timeout
+pytest-mock
 mock
