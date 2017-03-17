@@ -18,7 +18,7 @@ from pyspark import SparkContext, SparkConf, RDD
 try:
     import urllib2  # python 2
 except ImportError:
-    import urllib.requests as urllib2  # python 3
+    import urllib.request as urllib2  # python 3
 
 
 def executor_ips(sc):
