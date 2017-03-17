@@ -6,4 +6,5 @@ pytest
 pytest-rerunfailures
 pytest-timeout
 pytest-mock
+pytest-pep8
 mock
