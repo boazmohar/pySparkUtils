@@ -1,9 +1,9 @@
 from pySparkUtils.utils import watch
+from numpy.random import randint
 import pytest
 import time
 import multiprocessing
 pytestmark = pytest.mark.usefixtures("eng")
-from numpy.random import randint
 
 
 def test_no_sc():
