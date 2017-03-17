@@ -40,7 +40,9 @@ def executor_ips(sc):
         base_url = sc._jsc.sc().uiWebUrl().get()
     print(base_url)
     url = base_url + '/api/v1/applications/' + app_id + '/executors'
-    data = json.load(urllib2.urlopen(url))
+    response = urllib2.urlopen(url)
+    str_response = response.readall().decode('utf-8')
+    data = json.load(str_response)
     ips = set(map(lambda x: x[u'hostPort'].split(':')[0], data))
     return ips
 
