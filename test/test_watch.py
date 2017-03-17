@@ -1,6 +1,7 @@
 from pySparkUtils.utils import watch
 import pytest
 import time
+import multiprocessing
 pytestmark = pytest.mark.usefixtures("eng")
 
 
@@ -20,14 +21,16 @@ def test_no_fail_long(eng):
     @watch
     def test_func(sc):
         def test_inner(i):
-            time.sleep(0.1)
+            time.sleep(1)
             return i
-        result = sc.parallelize(range(100)).map(test_inner).reduce(lambda x, y: x+y)
-        return result
+        result = sc.parallelize(range(10)).map(test_inner)
+        return result.reduce(lambda x, y: x+y)
     answer = test_func(eng)
-    assert answer == sum(range(100))
+    assert answer == sum(range(10))
 
 
+@pytest.mark.skipif(multiprocessing.cpu_count() < 2,
+                    reason="requires more then 2 cores")
 def test_no_fail_short(eng):
     @watch
     def test_func(sc):
