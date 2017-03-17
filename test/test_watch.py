@@ -3,6 +3,7 @@ import pytest
 import time
 import multiprocessing
 pytestmark = pytest.mark.usefixtures("eng")
+from numpy.random import randint
 
 
 def test_no_sc():
@@ -23,7 +24,7 @@ def test_no_fail_long(eng):
         def test_inner(i):
             time.sleep(1)
             return i
-        result = sc.parallelize(range(10)).map(test_inner)
+        result = sc.parallelize(range(10), 10).map(test_inner)
         return result.reduce(lambda x, y: x+y)
     answer = test_func(eng)
     assert answer == sum(range(10))
@@ -44,9 +45,9 @@ def test_fail(eng):
     @watch
     def test_func(sc):
         def failing(x):
-            time.sleep(x)
+            time.sleep(randint(2, 20, 1))
             return x/0
-        return sc.parallelize(range(10)).map(failing).collect()
+        return sc.parallelize(range(10), 10).map(failing).collect()
 
     result = test_func(eng)
-    assert result is None
+    assert result < 0

@@ -161,11 +161,6 @@ def watch(func):
     """
 
     def dec(*args, **kwargs):
-        # lunch decorated function in a separate thread
-        result = Queue(1)
-        p = Process(target=lambda: result.put(func(*args, **kwargs)))
-        p.daemon = True
-
         # find sc variable from input params
         sc = None
         for item in tuple(args) + tuple(kwargs.values()):
@@ -174,35 +169,57 @@ def watch(func):
         if sc is None:
             raise ValueError('Could not find sc in the input params')
 
+        def check_fail(status_inner):
+            try:
+                jobIds = status_inner.getJobIdsForGroup(group_name)
+                if jobIds is None:
+                    return 1
+                for current in jobIds:
+                    print(2)
+                    job = status.getJobInfo(current)
+                    if job is None:
+                        break
+                    for sid in job.stageIds:
+                        print(3)
+                        info = status.getStageInfo(sid)
+                        if info:
+                            print(4)
+                            if info.numFailedTasks > 0:
+                                logging.getLogger('pySparkUtils').info(info)
+                                logging.getLogger('pySparkUtils').error('Found failed tasks at: %s' % info.name)
+                                return -1
+            except TypeError as ex:
+                if "'NoneType' object is not iterable" in ex.message:
+                    return -1
+                else:
+                    return -2
+        # lunch decorated function in a separate thread
+        result = Queue(1)
+        result_fail = Queue(1)
+        p = Process(target=lambda: result.put(func(*args, **kwargs)))
+        p.daemon = True
         group_name = 'watch_' + func.__name__
         sc.setJobGroup(group_name, '', True)
         status = sc.statusTracker()
         p.start()
         time.sleep(1)
-
+        p2 = Process(target=lambda: result_fail.put(check_fail(status)))
+        p2.daemon = True
+        p2.start()
         # get the status of all current stages
         while result.empty():
-            print(1)
-            jobIds = status.getJobIdsForGroup(group_name)
-            for current in jobIds:
-                print(2)
-                job = status.getJobInfo(current)
-                for sid in job.stageIds:
-                    print(3)
-                    info = status.getStageInfo(sid)
-                    if info:
-                        print(4)
-                        if info.numFailedTasks > 0:
-                            logging.getLogger('pySparkUtils').info(info)
-                            logging.getLogger('pySparkUtils').error('Found failed tasks at: %s' % info.name)
-                            sc.cancelAllJobs()
-                            p.terminate()
-                            return None
+            if not result_fail.empty():
+                fail_type = result_fail.get()
+                if fail_type <= -1:
+                    p2.terminate()
+                    time.sleep(0.5)
+                    p.terminate()
+                    sc.cancelAllJobs()
+                    return fail_type
             time.sleep(0.1)
-            print(6)
-            print(result.empty())
+        p.terminate()
+        p2.terminate()
         return result.get()
-
     return dec
 
 
