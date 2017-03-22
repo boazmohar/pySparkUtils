@@ -39,7 +39,7 @@ def executor_ips(sc):
         data = json.load(urlopen(url))
     except TypeError:
         response = urlopen(url)
-        str_response = response.readall().decode('utf-8')
+        str_response = response.read().decode('utf-8')
         data = json.loads(str_response)
     ips = set(map(lambda x: x[u'hostPort'].split(':')[0], data))
     return ips
