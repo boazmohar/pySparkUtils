@@ -3,6 +3,6 @@ import pytest
 pytestmark = pytest.mark.usefixtures("eng")
 
 
-def test_url(eng, mocker):
+def test_url(eng):
     res = executor_ips(eng)
     assert len(res) == 1
