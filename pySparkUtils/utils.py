@@ -1,7 +1,9 @@
 """ A set of utilities to manage pySpark SparkContext object
 Assumes you have pyspark (and py4j) on the PYTHONPATH and SPARK_HOME is defined
 """
+
 from future.utils import iteritems
+from future.moves.urllib.request import urlopen
 import collections
 import logging
 import time
@@ -13,12 +15,6 @@ import thunder as td
 import numpy as np
 from multiprocessing import Process, Queue
 from pyspark import SparkContext, SparkConf, RDD
-
-# urllib python 2 / 3 import
-try:
-    import urllib2  # python 2
-except ImportError:
-    import urllib.request as urllib2  # python 3
 
 
 def executor_ips(sc):
@@ -38,11 +34,13 @@ def executor_ips(sc):
         base_url = sc.uiWebUrl
     except AttributeError:
         base_url = sc._jsc.sc().uiWebUrl().get()
-    print(base_url)
     url = base_url + '/api/v1/applications/' + app_id + '/executors'
-    response = urllib2.urlopen(url)
-    str_response = response.readall().decode('utf-8')
-    data = json.load(str_response)
+    try:
+        data = json.load(urlopen(url))
+    except TypeError:
+        response = urlopen(url)
+        str_response = response.readall().decode('utf-8')
+        data = json.loads(str_response)
     ips = set(map(lambda x: x[u'hostPort'].split(':')[0], data))
     return ips
 
