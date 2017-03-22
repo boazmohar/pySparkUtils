@@ -4,13 +4,12 @@ python:
   - "2.7"
   - "3.5"
 
-addons:
-  apt:
-    packages:
-      - oracle-java8-set-default
-
-jdk:
-  - oraclejdk8
+env:
+  - JDK=oraclejdk8
+  - JDK=openjdk8
+dist: trusty
+before_script:
+  - jdk_switcher use $JDK
 
 sudo: false
 
