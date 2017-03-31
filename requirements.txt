@@ -1,4 +1,4 @@
-thunder-python
+thunder-python==1.4.2
 numpy
 scipy
 future
