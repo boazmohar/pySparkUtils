@@ -6,16 +6,6 @@ import multiprocessing
 pytestmark = pytest.mark.usefixtures("eng")
 
 
-def test_no_sc():
-    @watch
-    def test_func(sleep_time):
-        time.sleep(sleep_time)
-        return
-    with pytest.raises(ValueError) as excinfo:
-        test_func(10)
-    assert 'Could not find sc in the input params' in str(excinfo.value)
-
-
 def test_no_fail_long(eng):
     @watch
     def test_func(sc):
@@ -47,3 +37,13 @@ def test_fail(eng):
 
     result = test_func(eng)
     assert result < 0
+
+
+def test_no_sc(eng):
+    @watch
+    def test_func(sleep_time):
+        time.sleep(sleep_time)
+        return
+    with pytest.raises(ValueError) as excinfo:
+        test_func(10)
+    assert 'Could not find sc in the input params' in str(excinfo.value)
