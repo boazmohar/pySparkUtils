@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
     name='pySparkUtils',
     packages=['pySparkUtils'],
-    version='0.1.4',
+    version='0.1.5',
     description="A collection of utilities for handling pySpark's SparkContext",
     author='Boaz Mohar',
     author_email='boazmohar@gmail.com',

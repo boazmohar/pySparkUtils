@@ -3,9 +3,11 @@ requirements-dev.txt
 requirements.txt
 setup.cfg
 setup.py
+pySparkUtils/SVD.py
 pySparkUtils/__init__.py
 pySparkUtils/utils.py
 test/test_change.py
+test/test_executor_ips.py
 test/test_fallback.py
 test/test_rdd_pickle.py
 test/test_regroup.py

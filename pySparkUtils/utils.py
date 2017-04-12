@@ -4,6 +4,7 @@ Assumes you have pyspark (and py4j) on the PYTHONPATH and SPARK_HOME is defined
 
 from future.utils import iteritems
 from future.moves.urllib.request import urlopen
+from functools import wraps
 import collections
 import logging
 import time
@@ -130,7 +131,7 @@ def fallback(func):
     :param func: function to decorate
     :return: decorated function
     """
-
+    @wraps(func)
     def dec(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -159,7 +160,7 @@ def watch(func):
     :param func: function to decorate
     :return: decorated function
     """
-
+    @wraps(func)
     def dec(*args, **kwargs):
         # find sc variable from input params
         sc = None
@@ -231,7 +232,7 @@ def thunder_decorator(func):
     :param func: function to decorate
     :return: decorated function
     """
-
+    @wraps(func)
     def dec(*args, **kwargs):
         # find Images / Series object in args
         result = None
@@ -318,8 +319,6 @@ def thunder_decorator(func):
         else:
             return result
 
-    dec.__doc__ = func.__doc__
-    dec.__repr__ = func.__repr__
     return dec
 
 
