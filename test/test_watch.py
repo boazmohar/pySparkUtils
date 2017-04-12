@@ -16,8 +16,6 @@ def test_no_sc():
     assert 'Could not find sc in the input params' in str(excinfo.value)
 
 
-@pytest.mark.skipif(multiprocessing.cpu_count() < 2,
-                    reason="requires more then 2 cores")
 def test_no_fail_long(eng):
     @watch
     def test_func(sc):
@@ -30,8 +28,6 @@ def test_no_fail_long(eng):
     assert answer == sum(range(10))
 
 
-@pytest.mark.skipif(multiprocessing.cpu_count() < 2,
-                    reason="requires more then 2 cores")
 def test_no_fail_short(eng):
     @watch
     def test_func(sc):
