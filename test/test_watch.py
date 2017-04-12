@@ -6,6 +6,8 @@ pytestmark = pytest.mark.usefixtures("eng")
 
 
 def test_no_fail_long(eng):
+    print('2')
+
     @watch
     def test_func(sc):
         def test_inner(i):
