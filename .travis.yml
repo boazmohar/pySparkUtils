@@ -32,4 +32,4 @@ script:
   - export SPARK_HOME=`pwd`/spark-2.1.0-bin-hadoop2.7
   - export PYTHONPATH=$SPARK_HOME/python:$PYTHONPATH
   - export PYTHONPATH=$SPARK_HOME/python/lib/py4j-0.10.4-src.zip:$PYTHONPATH
-  - py.test -s -v --pep8
+  - py.test -s -v 
