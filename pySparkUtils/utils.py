@@ -29,7 +29,6 @@ def executor_ips(sc):
         app_id = sc.applicationId
     except AttributeError:
         app_id = sc.getConf().get('spark.app.id')
-    print(app_id)
     # for getting the url (see: https://github.com/apache/spark/pull/15000)
     try:
         base_url = sc.uiWebUrl
@@ -176,15 +175,12 @@ def watch(func):
                 if jobIds is None:
                     return 1
                 for current in jobIds:
-                    print(2)
                     job = status.getJobInfo(current)
                     if job is None:
                         break
                     for sid in job.stageIds:
-                        print(3)
                         info = status.getStageInfo(sid)
                         if info:
-                            print(4)
                             if info.numFailedTasks > 0:
                                 logging.getLogger('pySparkUtils').info(info)
                                 logging.getLogger('pySparkUtils').error('Found failed tasks at: %s' % info.name)
