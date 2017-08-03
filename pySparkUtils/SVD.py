@@ -86,13 +86,13 @@ def getSVD(data, k, getComponents=False, getS=False, normalization='mean'):
     :returns: projections, components, s
     """
     if normalization == 'nanmean':
-        data2 = data.tordd().sortByKey().values().map(lambda x: _convert_to_vector(x.flatten() - np.nanmean(x)))
+        data2 = data.sortByKey().values().map(lambda x: _convert_to_vector(x.flatten() - np.nanmean(x)))
     elif normalization == 'mean':
-        data2 = data.tordd().sortByKey().values().map(lambda x: _convert_to_vector(x.flatten() - x.mean()))
+        data2 = data.sortByKey().values().map(lambda x: _convert_to_vector(x.flatten() - x.mean()))
     elif normalization is 'zscore':
-        data2 = data.tordd().sortByKey().values().map(lambda x: _convert_to_vector(zscore(x.flatten())))
+        data2 = data.sortByKey().values().map(lambda x: _convert_to_vector(zscore(x.flatten())))
     elif normalization is None:
-        data2 = data.tordd().sortByKey().values().map(lambda x: _convert_to_vector(x.flatten()))
+        data2 = data.sortByKey().values().map(lambda x: _convert_to_vector(x.flatten()))
     else:
         raise ValueError('Normalization should be one of: mean, nanmean, zscore, None. Got: %s' % normalization)
 
