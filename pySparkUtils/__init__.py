@@ -9,4 +9,3 @@ def _setup():
 
 _setup()
 
-__version__ = '1.0.0'
