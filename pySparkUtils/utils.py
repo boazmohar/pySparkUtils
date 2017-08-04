@@ -80,11 +80,13 @@ def change(sc=None, app_name='customSpark', master=None, wait='ips', min_cores=N
         elif min_ips is None:
             min_ips = len(executor_ips(sc))
     elif wait == 'cores':
-        if sc is None:
-            logging.getLogger('pySparkUtils').info('Both sc and min_cores are None: setting target_cores to 2')
-            min_cores = 2
-        else:
-            min_cores = sc.defaultParallelism
+        if min_cores is None:
+            if sc is None:
+                logging.getLogger('pySparkUtils').info('Both sc and min_cores are None: setting target_cores to 2')
+                min_cores = 2
+            else:
+                min_cores = sc.defaultParallelism
+                logging.getLogger('pySparkUtils').info('min_cores is None: setting target_cores to: %d' % min_cores)
     elif wait is not None:
         raise ValueError("wait should be: ['ips','cores',None] got: %s" % wait)
 

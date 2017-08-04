@@ -4,10 +4,13 @@ import pytest
 pytestmark = pytest.mark.usefixtures("eng")
 
 
-def test_no_input():
+def test_no_input(eng):
     with pytest.raises(ValueError) as ex:
         change(sc=None, master=None)
     assert 'Both master and sc are None' in str(ex.value)
+    with pytest.raises(ValueError) as ex:
+        change(sc=eng, master=None, wait='error')
+    assert 'wait should be' in str(ex.value)
 
 
 def test_cores(eng):
@@ -35,3 +38,15 @@ def test_args(eng):
     new_conf = new_sc.getConf()
     assert new_conf.get('spark.rpc.message.maxSize') == new_value
     new_sc.stop()
+
+
+def test_cores(eng):
+    eng.stop()
+    new_sc = change(sc=None, master='local[2]', fail_on_timeout=False, wait='cores', min_cores=2)
+    assert new_sc.defaultParallelism == 2
+    new_sc2 = change(sc=new_sc, master='local[2]', fail_on_timeout=False, wait='cores', min_cores=None)
+    assert new_sc2.defaultParallelism == 2
+    new_sc2.stop()
+    with pytest.raises(RuntimeError) as ex:
+        change(sc=None, master='local[2]', fail_on_timeout=True, wait='cores', min_cores=3, timeout=4)
+    assert 'Time out' in str(ex.value)
