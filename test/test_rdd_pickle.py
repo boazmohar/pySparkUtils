@@ -13,7 +13,7 @@ def test_type(eng, tmpdir):
     save_rdd_as_pickle(data, path)
     with pytest.raises(ValueError) as excinfo:
         _ = load_rdd_from_pickle(eng, path, return_type='error')
-    assert 'return type not' in str(excinfo.value)
+    assert 'return_type not' in str(excinfo.value)
 
 
 def test_series(eng, tmpdir):
