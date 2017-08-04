@@ -34,6 +34,7 @@ def test_cores_wait4(eng):
     eng.stop()
     new_sc = change(sc=None, master='local', fail_on_timeout=False, wait='cores', min_cores=None)
     assert new_sc.defaultParallelism >= 1
+    new_sc.stop()
 
 
 def test_no_input(eng):
