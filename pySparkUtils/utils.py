@@ -118,6 +118,7 @@ def change(sc=None, app_name='customSpark', master=None, wait='ips', min_cores=N
             time.sleep(refresh_rate)
             total_time += refresh_rate
         if fail_on_timeout and total_time >= timeout:
+            sc.stop()
             raise RuntimeError('Time out reached when changing sc')
     logging.getLogger('pySparkUtils').info('Returning new sc with %d cores and %d executors' %
                                            (sc.defaultParallelism, len(executor_ips(sc))))

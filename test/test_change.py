@@ -40,7 +40,7 @@ def test_args(eng):
     new_sc.stop()
 
 
-def test_cores(eng):
+def test_cores_wait(eng):
     eng.stop()
     new_sc = change(sc=None, master='local[2]', fail_on_timeout=False, wait='cores', min_cores=2)
     assert new_sc.defaultParallelism == 2
