@@ -54,28 +54,26 @@ class SVD(JavaModelWrapper):
         return self.call("V")
 
 
-def compute_svd(row_matrix, k, compute_u=False, r_cond=1e-9, sort=True, normalization='mean'):
+def compute_svd(row_matrix, k, compute_u=False, r_cond=1e-9):
     """
 
     Computes the singular value decomposition of the RowMatrix.
+    :param row_matrix:
     The given row matrix A of dimension (m X n) is decomposed into U * s * V'T where
     * s: DenseVector consisting of square root of the eigenvalues (singular values) in descending order.
     * U: (m X k) (left singular vectors) is a RowMatrix whose columns are the eigenvectors of (A X A')
     * v: (n X k) (right singular vectors) is a Matrix whose columns are the eigenvectors of (A' X A)
     :param k: number of singular values to keep. We might return less than k if there are numerically zero
      singular values.
-    :param computeU: Whether of not to compute U. If set to be True, then U is computed by A * V * sigma^-1
-    :param rCond: the reciprocal condition number. All singular values smaller than rCond * sigma(0) are treated
+    :param compute_u: Whether of not to compute U. If set to be True, then U is computed by A * V * sigma^-1
+    :param r_cond: the reciprocal condition number. All singular values smaller than rCond * sigma(0) are treated
      as zero, where sigma(0) is the largest singular value.
-    :param sort: sort by key before using only values
-    param normalization: options are mean, nanmean, zscore, None
     :returns: SVD object
     """
-    java_model = row_matrix._java_matrix_wrapper.call("computeSVD", int(k), computeU, float(rCond))
+    java_model = row_matrix._java_matrix_wrapper.call("computeSVD", int(k), compute_u, float(r_cond))
     return SVD(java_model)
 
 
-@thunder_decorator
 def getSVD(data, k, getComponents=False, getS=False, normalization='mean'):
     """ Wrapper for computeSVD that will normalize and handle a Thunder Images object
 
@@ -86,20 +84,20 @@ def getSVD(data, k, getComponents=False, getS=False, normalization='mean'):
     :returns: projections, components, s
     """
     if normalization == 'nanmean':
-        data2 = data.sortByKey().values().map(lambda x: _convert_to_vector(x.flatten() - np.nanmean(x)))
+        data2 = data.tordd().sortByKey().values().map(lambda x: _convert_to_vector(x.flatten() - np.nanmean(x)))
     elif normalization == 'mean':
-        data2 = data.sortByKey().values().map(lambda x: _convert_to_vector(x.flatten() - x.mean()))
+        data2 = data.tordd().sortByKey().values().map(lambda x: _convert_to_vector(x.flatten() - x.mean()))
     elif normalization is 'zscore':
-        data2 = data.sortByKey().values().map(lambda x: _convert_to_vector(zscore(x.flatten())))
+        data2 = data.tordd().sortByKey().values().map(lambda x: _convert_to_vector(zscore(x.flatten())))
     elif normalization is None:
-        data2 = data.sortByKey().values().map(lambda x: _convert_to_vector(x.flatten()))
+        data2 = data.tordd().sortByKey().values().map(lambda x: _convert_to_vector(x.flatten()))
     else:
         raise ValueError('Normalization should be one of: mean, nanmean, zscore, None. Got: %s' % normalization)
 
     mat = RowMatrix(data2)
     mat.rows.cache()
     mat.rows.count()
-    svd = computeSVD(row_matrix=mat, k=k, computeU=False)
+    svd = compute_svd(row_matrix=mat, k=k, compute_u=False)
     if getComponents:
         components = svd.call("V").toArray()
         components = components.transpose(1, 0).reshape((k,) + data.shape[1:])
