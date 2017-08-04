@@ -9,7 +9,7 @@ pytestmark = pytest.mark.usefixtures("eng")
 
 def test_type(eng, tmpdir):
     data = td.series.fromrandom(engine=eng)
-    path = os.path.join(tmpdir.dirname, 'test1')
+    path = os.path.join(tmpdir.dirname, 'test0')
     save_rdd_as_pickle(data, path)
     with pytest.raises(ValueError) as excinfo:
         _ = load_rdd_from_pickle(eng, path, return_type='error')
