@@ -4,6 +4,12 @@ import pytest
 pytestmark = pytest.mark.usefixtures("eng")
 
 
+def test_ip_wait(eng):
+    with pytest.raises(RuntimeError) as ex:
+        _ = change(sc=eng, master='local[2]', fail_on_timeout=True, wait='ips', min_ips=10, timeout=4)
+    assert 'Time out' in str(ex.value)
+
+
 def test_cores_wait(eng):
     eng.stop()
     new_sc = change(sc=None, master='local[2]', fail_on_timeout=False, wait='cores', min_cores=2)
@@ -20,10 +26,16 @@ def test_cores_wait2(eng):
 
 def test_cores_wait3(eng):
     with pytest.raises(RuntimeError) as ex:
-        temp = change(sc=eng, master='local[2]', fail_on_timeout=True, wait='cores', min_cores=3, timeout=4)
+        _ = change(sc=eng, master='local[2]', fail_on_timeout=True, wait='cores', min_cores=3, timeout=4)
     assert 'Time out' in str(ex.value)
 
-    
+
+def test_cores_wait4(eng):
+    eng.stop()
+    new_sc = change(sc=None, master=None, fail_on_timeout=False, wait='cores', min_cores=None)
+    assert new_sc.defaultParallelism >= 2
+
+
 def test_no_input(eng):
     with pytest.raises(ValueError) as ex:
         change(sc=None, master=None)
