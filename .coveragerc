@@ -1,0 +1,4 @@
+[run]
+omit =
+    ./test/*
+    ./pySparkUtils/__init__.py

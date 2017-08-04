@@ -1,7 +1,8 @@
 pySparkUtils
 ============
 
-|Build Status| |PyPI version| |Updates|
+|Build Status| |PyPI version| |Updates| |Cover|
+
 
 A collection of utilities for handling pySpark SparkContext
 
@@ -35,3 +36,5 @@ Fell free to create issues or PRs
    :target: https://travis-ci.org/boazmohar/pySparkUtils
 .. |PyPI version| image:: https://badge.fury.io/py/pySparkUtils.svg
    :target: https://badge.fury.io/py/pySparkUtils
+.. |Cover| image:: https://coveralls.io/repos/github/boazmohar/pySparkUtils/badge.svg?branch=master
+   :target: https://coveralls.io/github/boazmohar/pySparkUtils?branch=master
