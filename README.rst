@@ -11,7 +11,7 @@ install
 
 .. code:: bash
 
-    pip install pySparkUtil
+    pip install pySparkUtils
 
 support
 -------
