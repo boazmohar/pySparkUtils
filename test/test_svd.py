@@ -40,6 +40,6 @@ def test_svd(eng):
     assert v1.shape == (2, 50)
     assert v2.shape == (2, 10, 5)
 
-    with pytest.raises(RuntimeError) as ex:
+    with pytest.raises(ValueError) as ex:
         u2, v2, s2 = getSVD(x, k=2, getComponents=True, getS=True, normalization='error')
     assert 'Normalization should be one of' in str(ex.value)
