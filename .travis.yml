@@ -3,6 +3,7 @@ language: python
 python:
   - "2.7"
   - "3.5"
+  - "3.6"
 
 env:
   - JDK=openjdk8
@@ -25,13 +26,13 @@ install:
   - conda create --yes -q -n test python=$TRAVIS_PYTHON_VERSION pip pytest numpy scipy
   - source activate test
   - pip install -r requirements-dev.txt
-  - wget http://d3kbcqa49mib13.cloudfront.net/spark-2.1.0-bin-hadoop2.7.tgz
-  - tar -xzf spark-2.1.0-bin-hadoop2.7.tgz
+  - wget https://d3kbcqa49mib13.cloudfront.net/spark-2.2.0-bin-hadoop2.7.tgz
+  - tar -xzf spark-2.2.0-bin-hadoop2.7.tgz
 
 script:
-  - export SPARK_HOME=`pwd`/spark-2.1.0-bin-hadoop2.7
+  - export SPARK_HOME=`pwd`/spark-2.2.0-bin-hadoop2.7
   - export PYTHONPATH=$SPARK_HOME/python:$PYTHONPATH
-  - export PYTHONPATH=$SPARK_HOME/python/lib/py4j-0.10.4-src.zip:$PYTHONPATH
+  - export PYTHONPATH=$SPARK_HOME/python/lib/py4j-0.10.6-src.zip:$PYTHONPATH
   - py.test -s -v --cov=./pySparkUtils
 
 after_success:
