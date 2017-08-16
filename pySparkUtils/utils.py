@@ -330,12 +330,11 @@ def load_rdd_from_pickle(sc, path, min_partitions=None, return_type='images'):
 
     :param sc: Spark Context
     :param path: directory to load from
-    :param min_partitions: minimum number of partitions.
-    f None will be sc.defaultParallelism
+    :param min_partitions: minimum number of partitions. If None will be sc.defaultParallelism
     :param return_type: what to return:
-    'rdd' - RDD
-    'images' - Thunder Images object
-    'series' - Thunder Series object
+        'rdd' - RDD
+        'images' - Thunder Images object
+        'series' - Thunder Series object
     :return: based on return type.
     """
     if min_partitions is None:
