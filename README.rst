@@ -11,12 +11,12 @@ install
 
 .. code:: bash
 
-    pip install pySparkUtil
+    pip install pySparkUtils
 
 support
 -------
 
-Tested on Spark 2.1 with python 2.7 and 3.5
+Tested on Spark 2.2 with python 2.7, 3.5 and 3.6
 
 documentation
 -------------
