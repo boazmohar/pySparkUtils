@@ -151,21 +151,22 @@ In the event of an error this decorator will log the error but return sc.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>sc</strong> – Spark Context</li>
 <li><strong>path</strong> – directory to load from</li>
-<li><strong>min_partitions</strong> – minimum number of partitions.</li>
+<li><strong>min_partitions</strong> – minimum number of partitions. If None will be sc.defaultParallelism</li>
+<li><strong>return_type</strong> – what to return:
+‘rdd’ - RDD
+‘images’ - Thunder Images object
+‘series’ - Thunder Series object</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">based on return type.</p>
 </td>
 </tr>
 </tbody>
 </table>
-<p>f None will be sc.defaultParallelism
-:param return_type: what to return:
-‘rdd’ - RDD
-‘images’ - Thunder Images object
-‘series’ - Thunder Series object
-:return: based on return type.</p>
 </dd></dl>
 
 <dl class="function">
