@@ -141,5 +141,4 @@ def test_rdd(eng):
 
     result = test_func2(1, rdd, arg3=3, arg4=4)
     assert isinstance(result[1], RDD)
-    print('1')
 

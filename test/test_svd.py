@@ -13,7 +13,6 @@ def test_svd(eng):
     x = fromarray(x_local.reshape(10, 10, 5), engine=eng)
     x.cache()
     x.count()
-    
     u1, s1, v1 = randomized_svd(x_local, n_components=2,  random_state=0)
 
     u2, v2, s2 = getSVD(x, k=2, getComponents=True, getS=True)
