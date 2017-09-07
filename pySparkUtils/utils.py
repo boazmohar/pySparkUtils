@@ -143,10 +143,10 @@ def fallback(func):
             _, _, tb = sys.exc_info()
             while tb.tb_next:
                 tb = tb.tb_next
-            frame = tb.tb_frame
-            for key, value in iteritems(frame.f_locals):
-                if isinstance(value, SparkContext) and value._jsc is not None:
-                    return frame.f_locals[key]
+                frame = tb.tb_frame
+                for key, value in iteritems(frame.f_locals):
+                    if isinstance(value, SparkContext) and value._jsc is not None:
+                        return frame.f_locals[key]
             logging.getLogger('pySparkUtils').error('Could not find SparkContext', exc_info=True)
             return None
 
