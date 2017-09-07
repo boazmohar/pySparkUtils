@@ -2,7 +2,7 @@ thunder-python==1.4.2
 scipy==0.19.1
 numpy==1.13.1
 future==0.16.0
-pytest-rerunfailures==3.0
+pytest-rerunfailures==3.1
 pytest==3.2.1
 pytest-timeout==1.2.0
 pytest-pep8==1.0.6
