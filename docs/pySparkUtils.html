@@ -54,7 +54,8 @@ Assumes you have pyspark (and py4j) on the PYTHONPATH and SPARK_HOME is defined<
 <dt id="pySparkUtils.utils.balanced_repartition">
 <code class="descclassname">pySparkUtils.utils.</code><code class="descname">balanced_repartition</code><span class="sig-paren">(</span><em>data</em>, <em>partitions</em><span class="sig-paren">)</span><a class="headerlink" href="#pySparkUtils.utils.balanced_repartition" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reparations an RDD making sure data is evenly distributed across partitions
-for Spark version &lt; 2.1 (see: <a class="reference external" href="https://issues.apache.org/jira/browse/SPARK-17817">https://issues.apache.org/jira/browse/SPARK-17817</a>)</p>
+for Spark version &lt; 2.1 (see: <a class="reference external" href="https://issues.apache.org/jira/browse/SPARK-17817">https://issues.apache.org/jira/browse/SPARK-17817</a>)
+or &lt; 2.3 when #partitions is power of 2 (see: <a class="reference external" href="https://issues.apache.org/jira/browse/SPARK-21782">https://issues.apache.org/jira/browse/SPARK-21782</a>)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />

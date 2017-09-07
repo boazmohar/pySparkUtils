@@ -256,6 +256,7 @@ def balanced_repartition(data, partitions):
     """ balanced_repartition(data, partitions)
     Reparations an RDD making sure data is evenly distributed across partitions
     for Spark version < 2.1 (see: https://issues.apache.org/jira/browse/SPARK-17817)
+    or < 2.3 when #partitions is power of 2 (see: https://issues.apache.org/jira/browse/SPARK-21782)
 
     :param data: RDD
     :param partitions: number of partition to use
