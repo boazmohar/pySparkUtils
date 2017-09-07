@@ -284,12 +284,14 @@ def regroup(rdd, groups=10, check_first=False):
     :return: a new rdd in the form of (groupNum, list of (k, v) in that group) pairs
 
     Example:
-    >>>data = sc.parallelize(zip(range(4), range(4)))
-    >>>data.collect()
-    >>> [(0, 0), (1, 1), (2, 2), (3, 3)]
-    >>>data2 = regroup(data, 2)
-    >>>data2.collect()
-    >>> [(0, [(0, 0), (2, 2)]), (1, [(1, 1), (3, 3)])]
+
+    >>> data = sc.parallelize(zip(range(4), range(4)))
+    >>> data.collect()
+    [(0, 0), (1, 1), (2, 2), (3, 3)]
+
+    >>> data2 = regroup(data, 2)
+    >>> data2.collect()
+    [(0, [(0, 0), (2, 2)]), (1, [(1, 1), (3, 3)])]
     """
     if check_first:
         first = rdd.first()

@@ -1,12 +1,12 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>pySparkUtils package &#8212; pySparkUtils 0.1.3 documentation</title>
+    <title>pySparkUtils package &#8212; pySparkUtils 0.2.5 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1.3',
+        VERSION:     '0.2.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -33,7 +33,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body>
+  <body role="document">
   
 
     <div class="document">
@@ -60,8 +60,8 @@ for Spark version &lt; 2.1 (see: <a class="reference external" href="https://iss
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data</strong> – RDD</li>
-<li><strong>partitions</strong> – number of partition to use</li>
+<li><strong>data</strong> &#8211; RDD</li>
+<li><strong>partitions</strong> &#8211; number of partition to use</li>
 </ul>
 </td>
 </tr>
@@ -74,29 +74,29 @@ for Spark version &lt; 2.1 (see: <a class="reference external" href="https://iss
 
 <dl class="function">
 <dt id="pySparkUtils.utils.change">
-<code class="descclassname">pySparkUtils.utils.</code><code class="descname">change</code><span class="sig-paren">(</span><em>sc=None</em>, <em>app_name=’customSpark’</em>, <em>master=None</em>, <em>wait=’ips’</em>, <em>min_cores=None</em>, <em>min_ips=None</em>, <em>timeout=30</em>, <em>refresh_rate=0.5</em>, <em>fail_on_timeout=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pySparkUtils.utils.change" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pySparkUtils.utils.</code><code class="descname">change</code><span class="sig-paren">(</span><em>sc=None</em>, <em>app_name='customSpark'</em>, <em>master=None</em>, <em>wait='ips'</em>, <em>min_cores=None</em>, <em>min_ips=None</em>, <em>timeout=30</em>, <em>refresh_rate=0.5</em>, <em>fail_on_timeout=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pySparkUtils.utils.change" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a new Spark Context (sc) object with added properties set</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>sc</strong> – current SparkContext if None will create a new one</li>
-<li><strong>app_name</strong> – name of new spark app</li>
-<li><strong>master</strong> – url to master, if None will get from current sc</li>
-<li><strong>wait</strong> – when to return after asking for a new sc (or max of timeout seconds):
-‘ips’: wait for all the previous ips that were connected to return (needs sc to not be None)
-‘cores’: wait for min_cores
+<li><strong>sc</strong> &#8211; current SparkContext if None will create a new one</li>
+<li><strong>app_name</strong> &#8211; name of new spark app</li>
+<li><strong>master</strong> &#8211; url to master, if None will get from current sc</li>
+<li><strong>wait</strong> &#8211; when to return after asking for a new sc (or max of timeout seconds):
+&#8216;ips&#8217;: wait for all the previous ips that were connected to return (needs sc to not be None)
+&#8216;cores&#8217;: wait for min_cores
 None: return immediately</li>
-<li><strong>min_cores</strong> – when wait is ‘cores’ will wait until defaultParallelism is back to at least this value.
+<li><strong>min_cores</strong> &#8211; when wait is &#8216;cores&#8217; will wait until defaultParallelism is back to at least this value.
 if None will be set to defaultParallelism.</li>
-<li><strong>min_ips</strong> – when wait is ‘ips’ will wait until number of unique executor ips is back to at least this value.
+<li><strong>min_ips</strong> &#8211; when wait is &#8216;ips&#8217; will wait until number of unique executor ips is back to at least this value.
 if None will be set to the what the original sc had.</li>
-<li><strong>timeout</strong> – max time in seconds to wait for new sc if wait is ‘ips’ or ‘cores’</li>
-<li><strong>fail_on_timeout</strong> – whether to fail if timeout has reached</li>
-<li><strong>refresh_rate</strong> – how long to wait in seconds between each check of defaultParallelism</li>
-<li><strong>kwargs</strong> – added properties to set. In the form of key value pairs (replaces ‘.’ with ‘_’ in key)
-examples: spark_task_cores=‘1’, spark_python_worker_memory=‘8g’
+<li><strong>timeout</strong> &#8211; max time in seconds to wait for new sc if wait is &#8216;ips&#8217; or &#8216;cores&#8217;</li>
+<li><strong>fail_on_timeout</strong> &#8211; whether to fail if timeout has reached</li>
+<li><strong>refresh_rate</strong> &#8211; how long to wait in seconds between each check of defaultParallelism</li>
+<li><strong>kwargs</strong> &#8211; added properties to set. In the form of key value pairs (replaces &#8216;.&#8217; with &#8216;_&#8217; in key)
+examples: spark_task_cores=&#8216;1&#8217;, spark_python_worker_memory=&#8216;8g&#8217;
 see: <a class="reference external" href="http://spark.apache.org/docs/latest/configuration.html">http://spark.apache.org/docs/latest/configuration.html</a></li>
 </ul>
 </td>
@@ -117,7 +117,7 @@ This uses the REST API of the status web UI on the driver (<a class="reference e
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sc</strong> – Spark context</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sc</strong> &#8211; Spark context</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">set of ip addresses</td>
 </tr>
@@ -135,7 +135,7 @@ In the event of an error this decorator will log the error but return sc.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func</strong> – function to decorate</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func</strong> &#8211; function to decorate</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">decorated function</td>
 </tr>
@@ -145,20 +145,20 @@ In the event of an error this decorator will log the error but return sc.</p>
 
 <dl class="function">
 <dt id="pySparkUtils.utils.load_rdd_from_pickle">
-<code class="descclassname">pySparkUtils.utils.</code><code class="descname">load_rdd_from_pickle</code><span class="sig-paren">(</span><em>sc</em>, <em>path</em>, <em>min_partitions=None</em>, <em>return_type=’images’</em><span class="sig-paren">)</span><a class="headerlink" href="#pySparkUtils.utils.load_rdd_from_pickle" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pySparkUtils.utils.</code><code class="descname">load_rdd_from_pickle</code><span class="sig-paren">(</span><em>sc</em>, <em>path</em>, <em>min_partitions=None</em>, <em>return_type='images'</em><span class="sig-paren">)</span><a class="headerlink" href="#pySparkUtils.utils.load_rdd_from_pickle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads an rdd that was saved as one pickle file per partition</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>sc</strong> – Spark Context</li>
-<li><strong>path</strong> – directory to load from</li>
-<li><strong>min_partitions</strong> – minimum number of partitions. If None will be sc.defaultParallelism</li>
-<li><strong>return_type</strong> – what to return:
-‘rdd’ - RDD
-‘images’ - Thunder Images object
-‘series’ - Thunder Series object</li>
+<li><strong>sc</strong> &#8211; Spark Context</li>
+<li><strong>path</strong> &#8211; directory to load from</li>
+<li><strong>min_partitions</strong> &#8211; minimum number of partitions. If None will be sc.defaultParallelism</li>
+<li><strong>return_type</strong> &#8211; what to return:
+&#8216;rdd&#8217; - RDD
+&#8216;images&#8217; - Thunder Images object
+&#8216;series&#8217; - Thunder Series object</li>
 </ul>
 </td>
 </tr>
@@ -171,16 +171,16 @@ In the event of an error this decorator will log the error but return sc.</p>
 
 <dl class="function">
 <dt id="pySparkUtils.utils.regroup">
-<code class="descclassname">pySparkUtils.utils.</code><code class="descname">regroup</code><span class="sig-paren">(</span><em>rdd</em>, <em>groups=10</em>, <em>check_first=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pySparkUtils.utils.regroup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Regroup an rdd using a new key added that is 0 … number of groups - 1</p>
+<code class="descclassname">pySparkUtils.utils.</code><code class="descname">regroup</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pySparkUtils.utils.regroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Regroup an rdd using a new key added that is 0 ... number of groups - 1</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>rdd</strong> – input rdd as a (k,v) pairs</li>
-<li><strong>groups</strong> – number of groups to concatenate to</li>
-<li><strong>check_first</strong> – check if first value is a key value pair.</li>
+<li><strong>rdd</strong> &#8211; input rdd as a (k,v) pairs</li>
+<li><strong>groups</strong> &#8211; number of groups to concatenate to</li>
+<li><strong>check_first</strong> &#8211; check if first value is a key value pair.</li>
 </ul>
 </td>
 </tr>
@@ -189,28 +189,32 @@ In the event of an error this decorator will log the error but return sc.</p>
 </tr>
 </tbody>
 </table>
-<p>Example:
-&gt;&gt;&gt;data = sc.parallelize(zip(range(4), range(4)))
-&gt;&gt;&gt;data.collect()
-&gt;&gt;&gt; [(0, 0), (1, 1), (2, 2), (3, 3)]
-&gt;&gt;&gt;data2 = regroup(data, 2)
-&gt;&gt;&gt;data2.collect()
-&gt;&gt;&gt; [(0, [(0, 0), (2, 2)]), (1, [(1, 1), (3, 3)])]</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">parallelize</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+<span class="go">[(0, 0), (1, 1), (2, 2), (3, 3)]</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data2</span> <span class="o">=</span> <span class="n">regroup</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data2</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+<span class="go">[(0, [(0, 0), (2, 2)]), (1, [(1, 1), (3, 3)])]</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">
 <dt id="pySparkUtils.utils.save_rdd_as_pickle">
-<code class="descclassname">pySparkUtils.utils.</code><code class="descname">save_rdd_as_pickle</code><span class="sig-paren">(</span><em>rdd</em>, <em>path</em>, <em>batch_size=10</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pySparkUtils.utils.save_rdd_as_pickle" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pySparkUtils.utils.</code><code class="descname">save_rdd_as_pickle</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pySparkUtils.utils.save_rdd_as_pickle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Saves an rdd by grouping all the records of each partition as one pickle file</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>rdd</strong> – rdd to save</li>
-<li><strong>path</strong> – where to save</li>
-<li><strong>batch_size</strong> – batch size to pass to spark saveAsPickleFile</li>
-<li><strong>overwrite</strong> – if directory exist whether to overwrite</li>
+<li><strong>rdd</strong> &#8211; rdd to save</li>
+<li><strong>path</strong> &#8211; where to save</li>
+<li><strong>batch_size</strong> &#8211; batch size to pass to spark saveAsPickleFile</li>
+<li><strong>overwrite</strong> &#8211; if directory exist whether to overwrite</li>
 </ul>
 </td>
 </tr>
@@ -228,7 +232,7 @@ Assumes only one input object of type Images/Series, and up to one output object
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func</strong> – function to decorate</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func</strong> &#8211; function to decorate</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">decorated function</td>
 </tr>
@@ -289,8 +293,8 @@ Assumes only one input object of type Images/Series, and up to one output object
       &copy;2017, Boaz Mohar.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
       <a href="_sources/pySparkUtils.rst.txt"

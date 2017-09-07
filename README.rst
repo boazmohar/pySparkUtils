@@ -28,6 +28,17 @@ contributing
 
 Fell free to create issues or PRs
 
+release
+-------
+
+.. code:: bash
+
+    py.test -s -v --cov=./pySparkUtils --pep8
+    bumpversion patch
+    /docs/make html
+    python setup.py sdist
+    twine upload dist/...
+
 .. _API Documentation: https://boazmohar.github.io/pySparkUtils/pySparkUtils.html#module-pySparkUtils.utils
 
 .. |Updates| image:: https://pyup.io/repos/github/boazmohar/pySparkUtils/shield.svg
