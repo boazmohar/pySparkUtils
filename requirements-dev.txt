@@ -1,6 +1,6 @@
 thunder-python==1.4.2
 scipy==0.19.1
-numpy==1.13.1
+numpy==1.13.3
 future==0.16.0
 pytest==3.2.2
 pytest-pep8==1.0.6
