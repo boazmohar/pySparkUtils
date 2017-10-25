@@ -10,6 +10,11 @@ env:
 
 dist: trusty
 
+addons:
+  apt:
+    packages:
+      - gfortran
+
 before_script:
   - jdk_switcher use $JDK
 
