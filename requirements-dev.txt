@@ -1,5 +1,5 @@
 thunder-python==1.4.2
-scipy==1.1.0
+scipy==1.3.3
 numpy==1.15.2
 future==0.16.0
 pytest==3.8.1
