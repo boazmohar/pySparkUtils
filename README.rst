@@ -1,3 +1,5 @@
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fboazmohar%2FpySparkUtils.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fboazmohar%2FpySparkUtils?ref=badge_shield)
+
 pySparkUtils
 ============
 
@@ -49,3 +51,7 @@ release
    :target: https://badge.fury.io/py/pySparkUtils
 .. |Cover| image:: https://coveralls.io/repos/github/boazmohar/pySparkUtils/badge.svg?branch=master
    :target: https://coveralls.io/github/boazmohar/pySparkUtils?branch=master
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fboazmohar%2FpySparkUtils.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fboazmohar%2FpySparkUtils?ref=badge_large)
